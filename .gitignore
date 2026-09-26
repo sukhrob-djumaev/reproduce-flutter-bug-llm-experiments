@@ -1,0 +1,40 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Flutter and Dart generated files
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+flutter_app/.android/
+flutter_app/.ios/
+flutter_app/.metadata
+flutter_app/.plugin_symlinks/
+
+# IDE and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# Local model and runtime artefacts
+.lmstudio/
+.local-models/
+models/
+*.gguf
+*.safetensors
+
+# Temporary experiment output
+results/runs/*
+!results/runs/.gitkeep
