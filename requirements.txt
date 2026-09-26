@@ -1,1 +1,2 @@
-# Dependencies are added in later phases.
+# Phase 3: local agent execution through LM Studio.
+openai-agents
