@@ -327,263 +327,114 @@ The archive is safe, the PydanticAI migration passes all checks and three CASE_0
 
 ---
 
-# Stage 5 — Configure LM Studio and One Local Model
+# Stage 5 — First Reliable Flutter Interaction
 
 ## Goal
 
-Make one local model available to the Python agent through LM Studio.
-
-## Important rule
-
-Do not add multiple models yet.
-
-Start with one local model that is small enough for the user's M1 Pro and supports instruction following/tool use adequately.
+Validate the clean PydanticAI implementation on CASE_001 with a simple operational instruction, without using the issue report yet.
 
 ## Tasks
 
-1. Configure `agent/models.py` for a single `local` model.
-2. Use LM Studio's OpenAI-compatible local endpoint.
-3. Keep endpoint/model settings easy to change.
-4. Do not hardcode secrets.
+Use CASE_001 only.
 
-The intended conceptual flow is:
+1. Start CASE_001 from a clean/reset state.
+2. Give the agent a simple operational instruction equivalent to:
 
 ```text
-agent/main.py
-    ↓
-PydanticAI
-    ↓
-LM Studio local API
-    ↓
-local model
+Inspect the running application.
+Read the current counter value.
+Press the + button once.
+Read the counter value again.
+Return the observed before and after values.
 ```
 
-## User attendance likely required
-
-Ask the user to:
-
-- install/open LM Studio if needed;
-- download the agreed model;
-- load/start the model;
-- enable the local OpenAI-compatible server;
-- provide/confirm the exact model identifier exposed by LM Studio.
-
-Do not guess the model identifier.
+3. Use only the existing `FULL` capability set.
+4. Keep the model-facing tools generic:
+   - `inspect_app()`
+   - `get_text(target)`
+   - `tap(target)`
+5. Do not hardcode CASE_001 selectors, expected values, or a fixed Python workflow.
+6. Do not load `issues/case_001.md` yet.
+7. Do not automatically correct a wrong typed result.
 
 ## Tests
 
-Before involving tools or Flutter:
+Run three clean attempts and record the real tool sequence, selected targets, before/after runtime observations, typed result, semantic agreement, duration/turns where available, termination behavior, trace retention, and any redundant or unexpected actions.
 
-1. call the local model through the configured endpoint;
-2. send a simple prompt such as:
-
-```text
-Reply with exactly: LOCAL_MODEL_OK
-```
-
-3. confirm the expected response is received.
-
-Then test through PydanticAI rather than only via a raw HTTP request.
+Infrastructure PASS means inspection, interaction, post-interaction observation delivery, typed output, natural termination, and trace retention all work. A semantically wrong model result is not automatically an infrastructure failure.
 
 ## Completion criteria
 
-PydanticAI can successfully obtain a response from the selected local model.
+Three clean CASE_001 interaction-validation runs complete successfully at the infrastructure level, with semantic disagreement recorded separately.
+
+Suggested commit:
+
+```text
+phase 5: validate flutter interaction flow
+```
 
 **STOP after reporting the result. Wait for user approval.**
 
 ---
 
-# Stage 6 — Verify Agent Tool Calling With a Dummy Tool
+# Stage 6 — First Issue-Driven Bug Reproduction
 
 ## Goal
 
-Prove that the selected local model + LM Studio + PydanticAI can actually perform tool calls before connecting Flutter.
-
-This stage is important because local-model tool calling can vary by model/runtime.
+Run the first actual research-style bug-reproduction attempt from a natural-language issue report.
 
 ## Tasks
 
-1. Create one trivial local Python tool, for example:
-
-```text
-get_test_value() -> "TOOL_OK"
-```
-
-2. Expose it to the agent using PydanticAI.
-3. Instruct the agent to call the tool and report its result.
-
-Do not add Flutter tools yet.
-
-## Tests
-
-A successful run must demonstrate:
-
-```text
-model
-  → requests tool
-  → PydanticAI executes tool
-  → tool returns value
-  → model receives observation
-  → final answer references TOOL_OK
-```
-
-Save the console output/trace for inspection.
-
-## Failure handling
-
-If the local model does not reliably call tools:
-
-- first check LM Studio's tool/function-calling support and model template;
-- test whether structured/JSON tool calling is configured correctly;
-- only then consider changing the local model.
-
-Do not build workarounds before understanding the failure.
-
-## Completion criteria
-
-One reliable SDK-managed tool call succeeds end-to-end.
-
-**STOP after reporting the result. Wait for user approval.**
-
----
-
-# Stage 7 — Connect Flutter/Dart MCP
-
-## Goal
-
-Expose the existing Flutter/Dart MCP capabilities to the agent instead of rebuilding Flutter interaction in Python.
-
-## Tasks
-
-1. Inspect how the local Flutter/Dart MCP server is currently installed/configured.
-2. Determine how it should be launched/connected from PydanticAI.
-3. Configure `agent/tools.py` to establish the MCP connection.
-4. Expose available MCP tools to the agent.
-5. Do not write custom `tap()`/`enter_text()` wrappers if equivalent MCP tools already exist.
-6. Document the actual MCP tool names detected at runtime.
-
-## User attendance may be required
-
-The user may need to:
-
-- install/configure Flutter/Dart MCP;
-- approve access;
-- start the Flutter app or simulator;
-- provide an existing MCP configuration used by Claude/Codex/VS Code.
-
-## Tests
-
-Start the simplest case:
-
-```bash
-flutter run -t lib/main_case_001.dart
-```
-
-Then test that the agent/MCP connection can at least:
-
-- see or inspect the running Flutter application;
-- retrieve a widget tree or equivalent runtime structure.
-
-Do **not** attempt full bug reproduction yet.
-
-## Completion criteria
-
-The agent can call at least one real Flutter/Dart MCP tool against the running application.
-
-**STOP after reporting the result. Wait for user approval.**
-
----
-
-# Stage 8 — First Real Flutter Interaction
-
-## Goal
-
-Prove that the agent can observe and change the running Flutter application's state.
-
-## Tasks
-
-Use CASE 001 only.
-
-1. Start CASE 001.
-2. Give the agent a simple operational instruction rather than the bug report, for example:
-
-```text
-Inspect the running application and press the + button once. Then tell me what happened.
-```
-
-3. Let the agent use only the currently available FULL capability set.
-4. No custom reproduction logic should be hardcoded.
-
-## Tests
-
-Confirm:
-
-- the agent inspected the app;
-- it selected an appropriate interaction tool;
-- the interaction actually occurred;
-- the agent received the resulting observation;
-- no manual copying of widget trees/logs into the model was necessary.
-
-## User attendance may be required
-
-Ask the user to visually confirm the interaction on the simulator if needed.
-
-## Completion criteria
-
-The local agent autonomously performs at least one meaningful Flutter UI action through the tool system.
-
-**STOP after reporting the result. Wait for user approval.**
-
----
-
-# Stage 9 — First End-to-End Bug Reproduction
-
-## Goal
-
-Run the first actual research-style attempt.
-
-## Tasks
-
-1. Launch CASE 001 in a clean/reset state.
+1. Launch CASE_001 in a clean/reset state.
 2. Load `issues/case_001.md`.
-3. Give the issue to the agent with a concise reproduction instruction such as:
+3. Give the issue to the agent with a concise, generic reproduction instruction.
+4. Let the agent decide how to inspect and interact with the app.
+5. Do not reveal implementation details, hidden selectors, expected values, or the known reproduction outcome.
+6. Return a typed self-assessment, for example:
 
 ```text
-You are given a reported Flutter bug.
-Use the available tools to operate and inspect the running application.
-Try to reproduce the reported behavior.
-When you finish, return one of:
-- REPRODUCED
-- NOT_REPRODUCED
-- INCONCLUSIVE
+status:
+  REPRODUCED | NOT_REPRODUCED | INCONCLUSIVE
 
-Briefly state the evidence for your decision.
+confidence:
+  optional bounded value if useful
+
+evidence:
+  short supporting explanation
 ```
 
-4. Do not tell the agent how the bug was implemented.
-5. Do not manually guide the agent during the run unless the run itself is being debugged rather than evaluated.
+7. Do not automatically correct the model's final judgement against runtime evidence.
+8. Keep runtime/tool evidence separate from the agent-reported result.
 
 ## Tests
 
-Verify whether the agent:
+Verify whether the agent understood the issue report, used the available Flutter runtime tools, attempted the relevant interaction, observed the resulting behavior, terminated naturally, produced a typed self-assessment, and retained a complete trace.
 
-- understood the issue;
-- interacted with the app;
-- observed the relevant behavior;
-- stopped reasonably;
-- gave a clear final status.
-
-The user should manually verify whether the agent's conclusion is correct for this first pilot run.
+For this first pilot, independently verify whether the agent's conclusion matches the actual CASE_001 behavior.
 
 ## Completion criteria
 
-One end-to-end bug-reproduction attempt works from issue file → agent → Flutter tools → final decision.
+One complete path works:
+
+```text
+issue file
+→ PydanticAI agent
+→ Flutter runtime tools
+→ runtime observations
+→ typed self-assessment
+```
+
+Suggested commit:
+
+```text
+phase 6: add first issue driven reproduction
+```
 
 **STOP after reporting the result. Wait for user approval.**
 
 ---
 
-# Stage 10 — Add Simple Result Storage
+# Stage 7 — Add Simple Result Storage
 
 ## Goal
 
@@ -624,7 +475,7 @@ Suggested `result.json` fields:
 }
 ```
 
-Use actual values. Do not fabricate token counts or step counts when the SDK/runtime does not expose them reliably.
+Use actual values. Do not fabricate token counts or step counts when the framework/runtime does not expose them reliably.
 
 Append one row to:
 
@@ -634,13 +485,7 @@ results/summary.csv
 
 ## Tests
 
-Run CASE 001 once and confirm:
-
-- a new unique run folder is created;
-- existing runs are not overwritten;
-- `result.json` is valid JSON;
-- `summary.csv` receives one matching row;
-- stored result matches the actual run.
+Run CASE_001 once and confirm a unique run folder is created, previous runs are not overwritten, `result.json` is valid JSON, `summary.csv` receives one matching row, and the stored result matches the actual run.
 
 ## Completion criteria
 
@@ -650,7 +495,7 @@ One complete run is persisted successfully.
 
 ---
 
-# Stage 11 — Run All Five Pilot Cases
+# Stage 8 — Run All Five Pilot Cases
 
 ## Goal
 
@@ -675,14 +520,14 @@ Cases:
 005
 ```
 
-Do not optimize the prompt for individual cases unless a general problem is discovered.
+Do not optimize the prompt for individual cases unless a genuinely general problem is discovered.
 
 ## Tests
 
 For every case record:
 
 - final agent status;
-- whether the user believes the status was correct;
+- whether independent/runtime evidence agrees;
 - rough duration;
 - step/turn count if available;
 - obvious failure reason if unsuccessful.
@@ -697,7 +542,7 @@ The system has attempted all five cases and produced a small first dataset of re
 
 ---
 
-# Stage 12 — Review Before Expanding
+# Stage 9 — Review Before Expanding
 
 ## Goal
 
@@ -720,6 +565,8 @@ After the five-case pilot, report:
    - Flutter environment;
    - issue wording;
    - agent configuration?
+9. Is PydanticAI still sufficiently neutral and unobtrusive for the formal study?
+10. What must be frozen before formal evaluation?
 
 ## Do not implement yet
 
