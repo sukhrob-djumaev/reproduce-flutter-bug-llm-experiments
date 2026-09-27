@@ -1,10 +1,12 @@
-"""LM Studio model configuration for the local agent proof."""
+"""Configurable LM Studio model setup for the PydanticAI agent."""
 
 from dataclasses import dataclass
 import os
 
-from agents import OpenAIChatCompletionsModel, set_tracing_disabled
 from openai import AsyncOpenAI
+from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.providers.openai import OpenAIProvider
+
 
 DEFAULT_LM_STUDIO_BASE_URL = "http://127.0.0.1:1234/v1"
 DEFAULT_LM_STUDIO_MODEL = "qwen2.5-7b-instruct"
@@ -20,7 +22,7 @@ class LocalModelConfig:
 
 
 def get_local_model_config() -> LocalModelConfig:
-    """Read the one supported local-model configuration from the environment."""
+    """Read the single supported local-model configuration from the environment."""
     return LocalModelConfig(
         base_url=os.getenv("LM_STUDIO_BASE_URL", DEFAULT_LM_STUDIO_BASE_URL),
         model_name=os.getenv("LM_STUDIO_MODEL", DEFAULT_LM_STUDIO_MODEL),
@@ -29,14 +31,12 @@ def get_local_model_config() -> LocalModelConfig:
 
 
 def create_local_client(config: LocalModelConfig) -> AsyncOpenAI:
-    """Create a client for LM Studio without requiring a cloud API key."""
+    """Create the local client without requiring a cloud API key."""
     return AsyncOpenAI(base_url=config.base_url, api_key=config.api_key)
 
 
-async def verify_configured_model(
-    config: LocalModelConfig, client: AsyncOpenAI
-) -> None:
-    """Fail clearly when LM Studio is unavailable or lacks the configured model."""
+async def verify_configured_model(config: LocalModelConfig, client: AsyncOpenAI) -> None:
+    """Fail clearly when LM Studio or the configured model is unavailable."""
     try:
         available_models = await client.models.list()
     except Exception as error:
@@ -52,12 +52,7 @@ async def verify_configured_model(
         )
 
 
-def create_local_model(
-    config: LocalModelConfig, client: AsyncOpenAI
-) -> OpenAIChatCompletionsModel:
-    """Create the Agents SDK model adapter for LM Studio chat completions."""
-    set_tracing_disabled(disabled=True)
-    return OpenAIChatCompletionsModel(
-        model=config.model_name,
-        openai_client=client,
-    )
+def create_local_model(config: LocalModelConfig, client: AsyncOpenAI) -> OpenAIChatModel:
+    """Create PydanticAI's OpenAI-compatible model for LM Studio."""
+    provider = OpenAIProvider(openai_client=client)
+    return OpenAIChatModel(config.model_name, provider=provider)

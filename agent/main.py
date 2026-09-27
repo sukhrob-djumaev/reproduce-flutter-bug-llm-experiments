@@ -1,8 +1,11 @@
-"""Run the Phase 3 local LM Studio Agents SDK tool-call proof."""
+"""Run one Stage 4C PydanticAI Flutter-runtime validation attempt."""
 
 import asyncio
+from dataclasses import dataclass
 
-from agents import Agent, ModelSettings, Runner
+from pydantic import BaseModel
+from pydantic_ai import Agent
+from pydantic_ai.messages import ModelMessagesTypeAdapter
 
 from capabilities import CapabilityMode
 from models import (
@@ -11,71 +14,105 @@ from models import (
     get_local_model_config,
     verify_configured_model,
 )
-from tools import add_numbers, get_tool_call_log, reset_tool_call_log
-
-EXPECTED_A = 17
-EXPECTED_B = 25
-EXPECTED_RESULT = 42
-
-INSTRUCTIONS = """You are validating a local tool integration.
-You must call add_numbers exactly once with a=17 and b=25.
-Do not calculate the answer yourself. After receiving the tool result, reply with
-the result and state that it came from add_numbers.
-"""
-
-PROMPT = "Use the available tool to calculate 17 + 25 and return the result."
+from tools import FlutterRuntimeAdapter, create_flutter_mcp_toolset
 
 
-async def run_proof() -> str:
-    """Run and verify the full model -> tool -> model loop once."""
+RUNTIME_INSTRUCTIONS = """Use only the provided runtime tools to complete this task.
+First call inspect_app(). From its result, identify the displayed counter and the +
+button. Read the counter, tap the + button exactly once, then read the same counter
+again. Never guess targets: use only targets returned by inspect_app(). Finish with
+the observed values in the required structured result."""
+
+RUNTIME_PROMPT = """Inspect the running CASE_001 Flutter app and return the before
+and after counter values after one press of the + button."""
+
+
+class CounterResult(BaseModel):
+    """Typed observation returned by the infrastructure-validation run."""
+
+    before_value: str
+    after_value: str
+
+
+@dataclass(frozen=True)
+class RuntimeAttempt:
+    """Typed result, complete PydanticAI history, and private runtime evidence."""
+
+    result: CounterResult
+    messages_json: str
+    calls: tuple[object, ...]
+    normalized_inspection: str | None
+
+
+async def run_flutter_runtime_attempt() -> RuntimeAttempt:
+    """Run PydanticAI normally; it owns the tool loop and natural termination."""
     config = get_local_model_config()
     client = create_local_client(config)
     await verify_configured_model(config, client)
 
-    reset_tool_call_log()
-    agent = Agent(
-        name="LM Studio tool-call proof",
-        instructions=INSTRUCTIONS,
-        model=create_local_model(config, client),
-        model_settings=ModelSettings(
-            temperature=0.0,
-            tool_choice="required",
-            parallel_tool_calls=False,
-        ),
-        tools=[add_numbers],
-    )
-    result = await Runner.run(agent, PROMPT, max_turns=3)
-    final_output = str(result.final_output).strip()
-    tool_calls = get_tool_call_log()
+    mcp_toolset = create_flutter_mcp_toolset()
+    async with mcp_toolset:
+        discovered_tool_names = {tool.name for tool in await mcp_toolset.list_tools()}
+        required_tools = {"dtd", "widget_inspector", "flutter_driver_command"}
+        missing_tools = required_tools - discovered_tool_names
+        if missing_tools:
+            raise RuntimeError(
+                "Dart MCP did not expose the required runtime tools: "
+                f"{sorted(missing_tools)}; available: {sorted(discovered_tool_names)}"
+            )
 
-    expected_call = (EXPECTED_A, EXPECTED_B, EXPECTED_RESULT)
-    actual_calls = tuple((call.a, call.b, call.result) for call in tool_calls)
-    if actual_calls != (expected_call,):
-        raise RuntimeError(
-            "Expected exactly one add_numbers(17, 25) call returning 42; "
-            f"received {actual_calls!r}."
-        )
-    if str(EXPECTED_RESULT) not in final_output:
-        raise RuntimeError(
-            "The agent completed the tool call but its final output did not contain 42: "
-            f"{final_output!r}"
+        adapter = FlutterRuntimeAdapter(mcp_toolset)
+        agent = Agent(
+            create_local_model(config, client),
+            output_type=CounterResult,
+            instructions=RUNTIME_INSTRUCTIONS,
+            model_settings={"temperature": 0.0},
+            end_strategy="graceful",
         )
 
+        @agent.tool_plain
+        async def inspect_app() -> str:
+            """Inspect the app and return its compact catalog of actionable targets."""
+            return await adapter.inspect_app()
+
+        @agent.tool_plain
+        async def get_text(target: str) -> str:
+            """Read the text associated with a target returned by inspect_app."""
+            return await adapter.get_text(target)
+
+        @agent.tool_plain
+        async def tap(target: str) -> str:
+            """Tap a target returned by inspect_app."""
+            return await adapter.tap(target)
+
+        run = await agent.run(RUNTIME_PROMPT)
+        messages = run.all_messages()
+        return RuntimeAttempt(
+            result=run.output,
+            messages_json=ModelMessagesTypeAdapter.dump_json(messages, indent=2).decode(),
+            calls=adapter.calls,
+            normalized_inspection=adapter.normalized_inspection,
+        )
+
+
+def _print_attempt(attempt: RuntimeAttempt) -> None:
+    """Print evidence without evaluating or correcting the model's conclusion."""
     print(f"Capability mode: {CapabilityMode.FULL}")
-    print(f"LM Studio endpoint: {config.base_url}")
-    print(f"LM Studio model: {config.model_name}")
-    print("Tool call: add_numbers(a=17, b=25) -> 42")
-    print(f"Final result: {final_output}")
-    print("Verification: PASS")
-    return final_output
+    print(f"Typed result: {attempt.result.model_dump_json()}")
+    print("Underlying Dart MCP trace:")
+    for call in attempt.calls:
+        print(f"- {call.tool_name}: {call.arguments}; {call.duration_seconds:.2f}s")
+    print(f"Normalized inspection: {attempt.normalized_inspection}")
+    print("Complete PydanticAI message history:")
+    print(attempt.messages_json)
 
 
 def main() -> None:
-    """Run the proof and make integration failures actionable."""
+    """Run the single infrastructure-validation attempt."""
     try:
-        asyncio.run(run_proof())
+        _print_attempt(asyncio.run(run_flutter_runtime_attempt()))
     except Exception as error:
-        print("Phase 3 local agent proof failed.")
+        print("Stage 4C PydanticAI runtime validation failed.")
         print(f"{type(error).__name__}: {error}")
         raise SystemExit(1) from error
 

@@ -61,9 +61,9 @@ The agent should receive the issue description, not a hidden explanation of wher
 
 ### 3. Thin agent layer
 
-The project does not implement a general-purpose agent framework.
+The project does not implement a general-purpose agent framework or a custom agent loop.
 
-It uses the **OpenAI Agents SDK** as the orchestration layer. The SDK is installed as a Python dependency and handles the agent loop, model interaction, and tool execution.
+It uses **PydanticAI** as the orchestration layer. PydanticAI is installed as a Python dependency and handles the agent loop, model interaction, tool execution, typed output, and complete message history.
 
 Our code should mainly configure:
 
@@ -344,16 +344,16 @@ Do not implement ablation conditions yet.
 Responsibilities:
 
 - configure/connect to Flutter/Dart MCP;
-- expose MCP tools to the agent through the Agents SDK;
+- expose a small model-facing tool surface through PydanticAI;
 - contain only small custom tools that are genuinely missing from MCP.
 
 Do not create Python wrappers for every Flutter action if MCP already supports them.
 
 ---
 
-## OpenAI Agents SDK
+## PydanticAI
 
-The OpenAI Agents SDK is a Python dependency, not a repository module that needs to be copied into the project.
+PydanticAI is a Python dependency, not a repository module that needs to be copied into the project.
 
 It should be installed into the project's Python virtual environment and imported by the code under `agent/`.
 
@@ -362,9 +362,9 @@ Its role is to provide:
 - the agent execution loop;
 - tool invocation;
 - model interaction;
-- result handling/tracing where available.
+- typed result handling and complete message history.
 
-The repository should use the SDK rather than implementing a custom reasoning loop.
+The repository should use PydanticAI rather than implementing a custom reasoning loop.
 
 ---
 
@@ -377,7 +377,7 @@ The architecture is:
 ```text
 Python agent
     ↓
-OpenAI Agents SDK
+PydanticAI
     ↓
 LM Studio OpenAI-compatible endpoint
     ↓
@@ -397,14 +397,14 @@ Preferred architecture:
 ```text
 LLM
  ↓
-OpenAI Agents SDK
+PydanticAI
  ↓
 Flutter/Dart MCP tools
  ↓
 Running Flutter app
 ```
 
-If the MCP server provides a required operation, use it directly.
+The model-facing tool surface should be small and generic: `inspect_app()`, `get_text(target)`, and `tap(target)`. Internally, those tools may use DTD, compact `widget_inspector` inspection, and `flutter_driver_command`; raw finder configuration and inspector IDs must not be exposed to the model.
 
 If something required for the research is missing, add a small custom tool only for that missing operation.
 
@@ -473,7 +473,7 @@ Development should progress through small verified stages:
 2. make the Flutter pilot application run;
 3. verify multiple case entry points;
 4. make a local model respond through LM Studio;
-5. make the Agents SDK call one simple tool;
+5. make PydanticAI call one simple tool;
 6. connect the agent to Flutter/Dart MCP;
 7. let the agent inspect/interact with the Flutter app;
 8. let the agent attempt one bug reproduction;

@@ -1,2 +1,2 @@
-# Phase 3: local agent execution through LM Studio.
-openai-agents
+# Stage 4C: local PydanticAI agent execution through LM Studio and Dart MCP.
+pydantic-ai==2.51.0

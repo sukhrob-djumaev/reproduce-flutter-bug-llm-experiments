@@ -294,31 +294,34 @@ Five issue files correspond cleanly to the five Flutter cases.
 
 ---
 
-# Stage 4 — Set Up the Python Agent Environment
+# Stage 4C — Preserve Investigation and Migrate Cleanly to PydanticAI
 
 ## Goal
 
-Install only the dependencies needed for the first agent proof of concept.
+Preserve the Phase 4 framework investigation, restore a clean Phase 1–3 main base, and migrate only the agent layer to PydanticAI for CASE_001 infrastructure validation.
 
 ## Tasks
 
-1. Activate `.venv`.
-2. Add the OpenAI Agents SDK dependency to `requirements.txt`.
-3. Add any small required dependencies for environment/config handling only if needed.
-4. Install requirements.
-5. Keep the agent files minimal.
-
-The Agents SDK is a dependency. Do **not** copy or reimplement its internal loop.
+1. Archive the uncommitted OpenAI Agents SDK runtime work, generic Flutter adapter, framework-comparison spike, and PydanticAI traces in a meaningful commit without rewriting Phase 1–3 history.
+2. Restore `main` to the clean Phase 1–3 base.
+3. Use `pydantic-ai==2.51.0` and do not retain OpenAI Agents SDK lifecycle work on `main`.
+4. Keep `agent/main.py`, `agent/models.py`, `agent/capabilities.py`, and `agent/tools.py` as the primary agent files.
+5. Support configurable `qwen2.5-7b-instruct` through `http://127.0.0.1:1234/v1` without hardcoded secrets.
+6. Keep only `FULL` and generic model-facing `inspect_app()`, `get_text(target)`, and `tap(target)` tools.
+7. Use `summaryOnly: true` inspection and normalize it into ValueKey targets; keep DTD, raw inspector, and Flutter Driver details private.
+8. Use typed `before_value` / `after_value` output, normal PydanticAI termination, and `result.all_messages()`; do not force tool choice, add a custom loop, or correct a wrong semantic result.
+9. Validate CASE_001 three times from clean app state. Record semantic disagreement separately; do not retry merely because the answer is wrong.
 
 ## Tests
 
-- import the Agents SDK successfully;
-- run a minimal Python script that creates a trivial agent or confirms the SDK is usable;
-- no Flutter interaction is needed yet.
+- dependency installation/check and `pip check`;
+- `python -m py_compile agent/*.py`;
+- `flutter analyze`, `git diff --check`, and an artifact check;
+- three clean CASE_001 infrastructure validations with runtime evidence.
 
 ## Completion criteria
 
-The Python environment can import and execute the agent framework.
+The archive is safe, the PydanticAI migration passes all checks and three CASE_001 infrastructure validations, and the working tree is clean after the Stage 4C commit.
 
 **STOP after reporting the result. Wait for user approval.**
 
@@ -348,7 +351,7 @@ The intended conceptual flow is:
 ```text
 agent/main.py
     ↓
-OpenAI Agents SDK
+PydanticAI
     ↓
 LM Studio local API
     ↓
@@ -380,11 +383,11 @@ Reply with exactly: LOCAL_MODEL_OK
 
 3. confirm the expected response is received.
 
-Then test through the Agents SDK rather than only via a raw HTTP request.
+Then test through PydanticAI rather than only via a raw HTTP request.
 
 ## Completion criteria
 
-The Agents SDK can successfully obtain a response from the selected local model.
+PydanticAI can successfully obtain a response from the selected local model.
 
 **STOP after reporting the result. Wait for user approval.**
 
@@ -394,7 +397,7 @@ The Agents SDK can successfully obtain a response from the selected local model.
 
 ## Goal
 
-Prove that the selected local model + LM Studio + Agents SDK can actually perform tool calls before connecting Flutter.
+Prove that the selected local model + LM Studio + PydanticAI can actually perform tool calls before connecting Flutter.
 
 This stage is important because local-model tool calling can vary by model/runtime.
 
@@ -406,7 +409,7 @@ This stage is important because local-model tool calling can vary by model/runti
 get_test_value() -> "TOOL_OK"
 ```
 
-2. Expose it to the agent using the Agents SDK.
+2. Expose it to the agent using PydanticAI.
 3. Instruct the agent to call the tool and report its result.
 
 Do not add Flutter tools yet.
@@ -418,7 +421,7 @@ A successful run must demonstrate:
 ```text
 model
   → requests tool
-  → Agents SDK executes tool
+  → PydanticAI executes tool
   → tool returns value
   → model receives observation
   → final answer references TOOL_OK
@@ -453,7 +456,7 @@ Expose the existing Flutter/Dart MCP capabilities to the agent instead of rebuil
 ## Tasks
 
 1. Inspect how the local Flutter/Dart MCP server is currently installed/configured.
-2. Determine how it should be launched/connected from the Agents SDK.
+2. Determine how it should be launched/connected from PydanticAI.
 3. Configure `agent/tools.py` to establish the MCP connection.
 4. Expose available MCP tools to the agent.
 5. Do not write custom `tap()`/`enter_text()` wrappers if equivalent MCP tools already exist.
@@ -809,7 +812,7 @@ When executing this plan:
 5. Do not redesign the repository unless the current stage proves the design insufficient.
 6. Do not introduce frameworks or folders that are not needed yet.
 7. Prefer existing Flutter/Dart MCP capabilities over custom Flutter automation code.
-8. Use the OpenAI Agents SDK rather than creating a custom agent loop.
+8. Use PydanticAI rather than creating a custom agent loop.
 9. Keep model configuration separate from capabilities.
 10. Keep only one `FULL` capability set during the pilot.
 11. Keep only one local model during the initial implementation.
