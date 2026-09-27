@@ -17,6 +17,7 @@ from models import (
     get_local_model_config,
     verify_configured_model,
 )
+from results import persist_run
 from tools import FlutterRuntimeAdapter, create_flutter_mcp_toolset
 
 
@@ -44,6 +45,7 @@ class RuntimeAttempt:
 
     issue_text: str
     instructions: str
+    model_name: str
     result: ReproductionResult
     messages_json: str
     calls: tuple[object, ...]
@@ -106,6 +108,7 @@ async def run_flutter_runtime_attempt() -> RuntimeAttempt:
         return RuntimeAttempt(
             issue_text=issue_text,
             instructions=REPRODUCTION_INSTRUCTIONS,
+            model_name=config.model_name,
             result=run.output,
             messages_json=ModelMessagesTypeAdapter.dump_json(messages, indent=2).decode(),
             calls=adapter.calls,
@@ -115,9 +118,17 @@ async def run_flutter_runtime_attempt() -> RuntimeAttempt:
         )
 
 
-def _print_attempt(attempt: RuntimeAttempt) -> None:
+def _print_attempt(
+    attempt: RuntimeAttempt,
+    run_id: str,
+    result_path: Path,
+    trace_path: Path,
+) -> None:
     """Print evidence without evaluating or correcting the model's conclusion."""
     print(f"Capability mode: {CapabilityMode.FULL}")
+    print(f"Run ID: {run_id}")
+    print(f"Result path: {result_path}")
+    print(f"Trace path: {trace_path}")
     print(f"Issue path: {ISSUE_PATH}")
     print("Exact issue text supplied to the model:")
     print(attempt.issue_text)
@@ -139,11 +150,22 @@ def _print_attempt(attempt: RuntimeAttempt) -> None:
 
 
 def main() -> None:
-    """Run the single Stage 6 issue-driven reproduction attempt."""
+    """Run and persist one Stage 7 issue-driven reproduction attempt."""
     try:
-        _print_attempt(asyncio.run(run_flutter_runtime_attempt()))
+        attempt = asyncio.run(run_flutter_runtime_attempt())
+        run_id, result_path, trace_path = persist_run(
+            case="001",
+            model=attempt.model_name,
+            capabilities=str(CapabilityMode.FULL),
+            status=attempt.result.status,
+            evidence=attempt.result.evidence,
+            duration_seconds=attempt.duration_seconds,
+            turns=attempt.turns,
+            messages_json=attempt.messages_json,
+        )
+        _print_attempt(attempt, run_id, result_path, trace_path)
     except Exception as error:
-        print("Stage 6 issue-driven reproduction failed.")
+        print("Stage 7 issue-driven reproduction and persistence failed.")
         print(f"{type(error).__name__}: {error}")
         raise SystemExit(1) from error
 
