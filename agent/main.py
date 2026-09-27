@@ -1,4 +1,4 @@
-"""Run one Stage 4C PydanticAI Flutter-runtime validation attempt."""
+"""Run one Stage 5 PydanticAI Flutter-interaction attempt."""
 
 import asyncio
 from dataclasses import dataclass
@@ -17,14 +17,13 @@ from models import (
 from tools import FlutterRuntimeAdapter, create_flutter_mcp_toolset
 
 
-RUNTIME_INSTRUCTIONS = """Use only the provided runtime tools to complete this task.
-First call inspect_app(). From its result, identify the displayed counter and the +
-button. Read the counter, tap the + button exactly once, then read the same counter
-again. Never guess targets: use only targets returned by inspect_app(). Finish with
-the observed values in the required structured result."""
+RUNTIME_INSTRUCTIONS = """Use only the provided runtime tools to complete the task.
+Never guess targets: use only targets returned by inspect_app(). Return the values
+you observed in the required structured result."""
 
-RUNTIME_PROMPT = """Inspect the running CASE_001 Flutter app and return the before
-and after counter values after one press of the + button."""
+RUNTIME_PROMPT = """Inspect the running application. Read the current counter value.
+Press the + button once. Read the counter value again. Return the observed before and
+after values."""
 
 
 class CounterResult(BaseModel):
@@ -108,11 +107,11 @@ def _print_attempt(attempt: RuntimeAttempt) -> None:
 
 
 def main() -> None:
-    """Run the single infrastructure-validation attempt."""
+    """Run the single Stage 5 interaction attempt."""
     try:
         _print_attempt(asyncio.run(run_flutter_runtime_attempt()))
     except Exception as error:
-        print("Stage 4C PydanticAI runtime validation failed.")
+        print("Stage 5 PydanticAI runtime interaction failed.")
         print(f"{type(error).__name__}: {error}")
         raise SystemExit(1) from error
 
