@@ -1,6 +1,7 @@
-"""Run one Stage 6 issue-driven Flutter bug-reproduction attempt."""
+"""Run one issue-driven Flutter bug-reproduction attempt."""
 
 import asyncio
+import argparse
 from dataclasses import dataclass
 from pathlib import Path
 from time import monotonic
@@ -22,7 +23,7 @@ from tools import FlutterRuntimeAdapter, create_flutter_mcp_toolset
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-ISSUE_PATH = PROJECT_ROOT / "issues" / "case_001.md"
+ISSUES_DIRECTORY = PROJECT_ROOT / "issues"
 
 REPRODUCTION_INSTRUCTIONS = """You are given a reported Flutter bug.
 
@@ -43,6 +44,8 @@ class ReproductionResult(BaseModel):
 class RuntimeAttempt:
     """Typed result, complete PydanticAI history, and private runtime evidence."""
 
+    case: str
+    issue_path: Path
     issue_text: str
     instructions: str
     model_name: str
@@ -54,14 +57,15 @@ class RuntimeAttempt:
     turns: int
 
 
-def load_issue() -> str:
+def load_issue(case: str) -> tuple[Path, str]:
     """Load the natural-language issue report supplied to the model."""
-    return ISSUE_PATH.read_text(encoding="utf-8")
+    issue_path = ISSUES_DIRECTORY / f"case_{case}.md"
+    return issue_path, issue_path.read_text(encoding="utf-8")
 
 
-async def run_flutter_runtime_attempt() -> RuntimeAttempt:
+async def run_flutter_runtime_attempt(case: str) -> RuntimeAttempt:
     """Run PydanticAI normally; it owns the tool loop and natural termination."""
-    issue_text = load_issue()
+    issue_path, issue_text = load_issue(case)
     config = get_local_model_config()
     client = create_local_client(config)
     await verify_configured_model(config, client)
@@ -69,7 +73,12 @@ async def run_flutter_runtime_attempt() -> RuntimeAttempt:
     mcp_toolset = create_flutter_mcp_toolset()
     async with mcp_toolset:
         discovered_tool_names = {tool.name for tool in await mcp_toolset.list_tools()}
-        required_tools = {"dtd", "widget_inspector", "flutter_driver_command"}
+        required_tools = {
+            "dtd",
+            "get_runtime_errors",
+            "widget_inspector",
+            "flutter_driver_command",
+        }
         missing_tools = required_tools - discovered_tool_names
         if missing_tools:
             raise RuntimeError(
@@ -101,11 +110,18 @@ async def run_flutter_runtime_attempt() -> RuntimeAttempt:
             """Tap a target returned by inspect_app."""
             return await adapter.tap(target)
 
+        @agent.tool_plain
+        async def get_runtime_errors() -> str:
+            """Read recent runtime errors from the active Flutter application."""
+            return await adapter.get_runtime_errors()
+
         started_at = monotonic()
         run = await agent.run(f"Reported issue:\n\n{issue_text}")
         duration_seconds = monotonic() - started_at
         messages = run.all_messages()
         return RuntimeAttempt(
+            case=case,
+            issue_path=issue_path,
             issue_text=issue_text,
             instructions=REPRODUCTION_INSTRUCTIONS,
             model_name=config.model_name,
@@ -129,7 +145,7 @@ def _print_attempt(
     print(f"Run ID: {run_id}")
     print(f"Result path: {result_path}")
     print(f"Trace path: {trace_path}")
-    print(f"Issue path: {ISSUE_PATH}")
+    print(f"Issue path: {attempt.issue_path}")
     print("Exact issue text supplied to the model:")
     print(attempt.issue_text)
     print("Agent instruction:")
@@ -149,12 +165,20 @@ def _print_attempt(
     print(attempt.messages_json)
 
 
+def _parse_arguments() -> argparse.Namespace:
+    """Accept one existing issue case without selecting a model or capability variant."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--case", required=True, choices=["001", "002", "003", "004", "005"])
+    return parser.parse_args()
+
+
 def main() -> None:
-    """Run and persist one Stage 7 issue-driven reproduction attempt."""
+    """Run and persist one issue-driven reproduction attempt."""
+    arguments = _parse_arguments()
     try:
-        attempt = asyncio.run(run_flutter_runtime_attempt())
+        attempt = asyncio.run(run_flutter_runtime_attempt(arguments.case))
         run_id, result_path, trace_path = persist_run(
-            case="001",
+            case=attempt.case,
             model=attempt.model_name,
             capabilities=str(CapabilityMode.FULL),
             status=attempt.result.status,

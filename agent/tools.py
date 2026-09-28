@@ -7,6 +7,7 @@ import re
 from time import monotonic
 from typing import Any
 
+from fastmcp.exceptions import ToolError
 from pydantic_ai.mcp import MCPToolset, StdioTransport
 
 
@@ -42,6 +43,12 @@ class FlutterRuntimeAdapter:
 
     _APP_URI_PATTERN = re.compile(r"ws://[^\s\"']+/ws")
     _DTD_URI_PATTERN = re.compile(r"ws://[^\s\"']+")
+    _RUNTIME_ERROR_COUNT_PATTERN = re.compile(r"Found (\d+) error")
+    _RUNTIME_ERROR_SUMMARY_PATTERN = re.compile(
+        r"renderedErrorText: .*?The following (?P<type>.+?) was thrown.*?\n"
+        r"(?P<summary>.+?)(?:\n|$)",
+        re.DOTALL,
+    )
     _STRING_VALUE_KEY_PATTERN = re.compile(r"-\[<'([^']+)'\>")
 
     def __init__(self, mcp_toolset: MCPToolset) -> None:
@@ -69,11 +76,31 @@ class FlutterRuntimeAdapter:
 
     async def get_text(self, target: str) -> str:
         """Read text from a target previously exposed by ``inspect_app``."""
-        return await self._driver_command("get_text", target)
+        try:
+            return await self._driver_command("get_text", target)
+        except ToolError as error:
+            if not self._is_unsupported_text_read(error):
+                raise
+            return json.dumps(
+                {
+                    "ok": False,
+                    "target": target,
+                    "reason": "text retrieval is not supported for this widget",
+                },
+                separators=(",", ":"),
+            )
 
     async def tap(self, target: str) -> str:
         """Tap a target previously exposed by ``inspect_app``."""
         return await self._driver_command("tap", target)
+
+    async def get_runtime_errors(self) -> str:
+        """Return recent runtime errors from the active Flutter application."""
+        raw_errors = await self._call_text(
+            "get_runtime_errors",
+            {"appUri": await self._get_app_uri()},
+        )
+        return self._compact_runtime_errors(raw_errors)
 
     async def _get_app_uri(self) -> str:
         if self._app_uri is not None:
@@ -102,18 +129,82 @@ class FlutterRuntimeAdapter:
 
     async def _call_text(self, tool_name: str, arguments: dict[str, Any]) -> str:
         started_at = monotonic()
-        result = await self._mcp_toolset.direct_call_tool(tool_name, arguments)
+        try:
+            result = await self._mcp_toolset.direct_call_tool(tool_name, arguments)
+        except ToolError as error:
+            self._record_call(tool_name, arguments, started_at, str(error))
+            raise
         text = result if isinstance(result, str) else json.dumps(result, ensure_ascii=False)
+        self._record_call(tool_name, arguments, started_at, text)
+
+        return text
+
+    def _record_call(
+        self,
+        tool_name: str,
+        arguments: dict[str, Any],
+        started_at: float,
+        output: str,
+    ) -> None:
         self._calls.append(
             UnderlyingMCPCall(
                 tool_name=tool_name,
                 arguments=arguments,
                 duration_seconds=monotonic() - started_at,
-                output_characters=len(text),
-                output=text,
+                output_characters=len(output),
+                output=output,
             )
         )
-        return text
+
+    @staticmethod
+    def _is_unsupported_text_read(error: ToolError) -> bool:
+        error_text = str(error)
+        return "Unsupported operation:" in error_text and "getText" in error_text
+
+    @staticmethod
+    def _compact_runtime_errors(raw_errors: str) -> str:
+        """Return official runtime-error data without MCP transport envelopes."""
+        try:
+            payload = json.loads(raw_errors)
+        except json.JSONDecodeError:
+            return json.dumps(
+                {"error_count": 1, "errors": [raw_errors.strip()]},
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
+
+        if not isinstance(payload, list):
+            return json.dumps(
+                {"error_count": 1, "errors": [str(payload)]},
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
+
+        error_count: int | None = None
+        errors: list[str] = []
+        for item in payload:
+            item_text = str(item).strip()
+            count_match = FlutterRuntimeAdapter._RUNTIME_ERROR_COUNT_PATTERN.search(item_text)
+            if count_match:
+                error_count = int(count_match.group(1))
+                continue
+            if item_text == "No runtime errors found.":
+                error_count = 0
+                continue
+            summary_match = FlutterRuntimeAdapter._RUNTIME_ERROR_SUMMARY_PATTERN.search(item_text)
+            if summary_match:
+                errors.append(
+                    f"{summary_match.group('type').strip()}: "
+                    f"{summary_match.group('summary').strip()}"
+                )
+            else:
+                errors.append(" ".join(item_text.split())[:300])
+
+        return json.dumps(
+            {"error_count": error_count if error_count is not None else len(errors), "errors": errors},
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
 
     @staticmethod
     def _first_uri(text: str, pattern: re.Pattern[str], label: str) -> str:
