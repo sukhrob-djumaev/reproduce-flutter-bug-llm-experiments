@@ -56,6 +56,7 @@ class FlutterRuntimeAdapter:
         self._app_uri: str | None = None
         self._calls: list[UnderlyingMCPCall] = []
         self._actionable_targets: set[str] = set()
+        self._has_current_inspection = False
         self.raw_inspection: str | None = None
         self.normalized_inspection: str | None = None
 
@@ -65,7 +66,7 @@ class FlutterRuntimeAdapter:
         return tuple(self._calls)
 
     async def inspect_app(self) -> str:
-        """Return a compact, normalized catalog of actionable app targets."""
+        """Return actionable targets plus passive visible text observations."""
         app_uri = await self._get_app_uri()
         self.raw_inspection = await self._call_text(
             "widget_inspector",
@@ -113,9 +114,24 @@ class FlutterRuntimeAdapter:
         return self._app_uri
 
     async def _driver_command(self, command: str, target: str) -> str:
+        if not self._has_current_inspection:
+            return json.dumps(
+                {
+                    "ok": False,
+                    "reason": "app state may have changed; call inspect_app() before using target-based tools",
+                },
+                separators=(",", ":"),
+            )
         if target not in self._actionable_targets:
-            raise ValueError("target must exactly match a target returned by inspect_app")
-        return await self._call_text(
+            return json.dumps(
+                {
+                    "ok": False,
+                    "target": target,
+                    "reason": "target is not available in the current inspected state",
+                },
+                separators=(",", ":"),
+            )
+        result = await self._call_text(
             "flutter_driver_command",
             {
                 "command": command,
@@ -126,6 +142,10 @@ class FlutterRuntimeAdapter:
                 "timeout": "5000",
             },
         )
+        if command == "tap":
+            self._actionable_targets.clear()
+            self._has_current_inspection = False
+        return result
 
     async def _call_text(self, tool_name: str, arguments: dict[str, Any]) -> str:
         started_at = monotonic()
@@ -214,29 +234,42 @@ class FlutterRuntimeAdapter:
         return match.group(0)
 
     def _normalize_inspection(self, raw_tree: str) -> str:
-        """Turn compact Inspector JSON into model-facing ValueKey targets."""
+        """Turn compact Inspector JSON into targets and passive text observations."""
         try:
             tree = json.loads(raw_tree)
         except json.JSONDecodeError as error:
             raise RuntimeError("Dart MCP compact widget tree was not valid JSON") from error
         elements: list[dict[str, str]] = []
+        observations: list[dict[str, str]] = []
         self._actionable_targets.clear()
+        self._has_current_inspection = True
         for node in self._walk_tree(tree):
             target = self._value_key_for(node)
-            if target is None:
-                continue
             widget_type = str(node.get("widgetRuntimeType", "Widget"))
-            element: dict[str, str] = {
-                "type": self._element_type(widget_type),
-                "widget_type": widget_type,
-                "target": target,
-            }
             visible_text = self._visible_text(node)
-            if visible_text:
-                element["text" if element["type"] == "text" else "label"] = visible_text
-            elements.append(element)
-            self._actionable_targets.add(target)
-        return json.dumps({"elements": elements}, ensure_ascii=False, separators=(",", ":"))
+            if target is not None:
+                element: dict[str, str] = {
+                    "type": self._element_type(widget_type),
+                    "widget_type": widget_type,
+                    "target": target,
+                }
+                if visible_text:
+                    element["text" if element["type"] == "text" else "label"] = visible_text
+                elements.append(element)
+                self._actionable_targets.add(target)
+            elif widget_type == "Text" and visible_text:
+                observations.append(
+                    {
+                        "type": "text",
+                        "widget_type": widget_type,
+                        "text": visible_text,
+                    }
+                )
+        return json.dumps(
+            {"elements": elements, "observations": observations},
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
 
     @staticmethod
     def _walk_tree(node: object):
