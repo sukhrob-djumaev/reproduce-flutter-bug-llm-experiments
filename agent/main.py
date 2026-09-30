@@ -87,6 +87,7 @@ async def run_flutter_runtime_attempt(case: str) -> RuntimeAttempt:
             )
 
         adapter = FlutterRuntimeAdapter(mcp_toolset)
+        await adapter.begin_runtime_error_window()
         agent = Agent(
             create_local_model(config, client),
             output_type=ReproductionResult,
@@ -186,6 +187,7 @@ def main() -> None:
             duration_seconds=attempt.duration_seconds,
             turns=attempt.turns,
             messages_json=attempt.messages_json,
+            tool_events=[call.audit_record() for call in attempt.calls],
         )
         _print_attempt(attempt, run_id, result_path, trace_path)
     except Exception as error:

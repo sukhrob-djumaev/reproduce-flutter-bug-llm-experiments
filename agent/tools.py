@@ -1,14 +1,23 @@
 """Generic Flutter runtime adapter backed by the Dart MCP server."""
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from hashlib import sha256
 import json
 from pathlib import Path
 import re
 from time import monotonic
-from typing import Any
+from typing import Any, Literal
 
 from fastmcp.exceptions import ToolError
 from pydantic_ai.mcp import MCPToolset, StdioTransport
+
+from formal_contracts import (
+    RuntimeErrorItem,
+    RuntimeErrorObservation,
+    RuntimeErrorReason,
+    RuntimeErrorScope,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -31,11 +40,28 @@ def create_flutter_mcp_toolset() -> MCPToolset:
 class UnderlyingMCPCall:
     """One Dart MCP call made by the generic model-facing adapter."""
 
+    call_id: str
+    started_at_utc: str
     tool_name: str
     arguments: dict[str, Any]
     duration_seconds: float
+    outcome: str
     output_characters: int
     output: str
+    output_sha256: str
+
+    def audit_record(self) -> dict[str, Any]:
+        """Return the private, persisted form of this raw Dart MCP event."""
+        return {
+            "event_id": self.call_id,
+            "tool_name": self.tool_name,
+            "started_at_utc": self.started_at_utc,
+            "duration_seconds": self.duration_seconds,
+            "outcome": self.outcome,
+            "arguments": self.arguments,
+            "output": self.output,
+            "output_sha256": self.output_sha256,
+        }
 
 
 class FlutterRuntimeAdapter:
@@ -57,6 +83,9 @@ class FlutterRuntimeAdapter:
         self._calls: list[UnderlyingMCPCall] = []
         self._actionable_targets: set[str] = set()
         self._has_current_inspection = False
+        self._runtime_error_window_started_at: str | None = None
+        self._runtime_session_id: str | None = None
+        self._runtime_observation_count = 0
         self.raw_inspection: str | None = None
         self.normalized_inspection: str | None = None
 
@@ -96,12 +125,46 @@ class FlutterRuntimeAdapter:
         return await self._driver_command("tap", target)
 
     async def get_runtime_errors(self) -> str:
-        """Return recent runtime errors from the active Flutter application."""
-        raw_errors = await self._call_text(
+        """Return typed runtime-error evidence without exposing raw MCP output."""
+        if self._runtime_error_window_started_at is None:
+            try:
+                await self.begin_runtime_error_window()
+            except Exception:
+                return self._failure_runtime_observation(
+                    status="unavailable",
+                    code="runtime_session_unavailable",
+                    message="The active Flutter runtime session is unavailable.",
+                ).model_dump_json()
+
+        try:
+            raw_errors = await self._call_text(
+                "get_runtime_errors",
+                {"appUri": await self._get_app_uri()},
+            )
+        except ToolError:
+            return self._failure_runtime_observation(
+                status="tool_error",
+                code="dart_mcp_tool_error",
+                message="The Dart MCP runtime-error tool returned an error.",
+            ).model_dump_json()
+        except Exception:
+            return self._failure_runtime_observation(
+                status="tool_error",
+                code="dart_mcp_transport_error",
+                message="The Dart MCP runtime-error transport failed.",
+            ).model_dump_json()
+
+        return self._runtime_observation_from_raw(raw_errors).model_dump_json()
+
+    async def begin_runtime_error_window(self) -> None:
+        """Clear inherited errors before a run so later evidence has a known window."""
+        app_uri = await self._get_app_uri()
+        await self._call_text(
             "get_runtime_errors",
-            {"appUri": await self._get_app_uri()},
+            {"appUri": app_uri, "clearRuntimeErrors": True},
         )
-        return self._compact_runtime_errors(raw_errors)
+        self._runtime_session_id = sha256(app_uri.encode("utf-8")).hexdigest()[:16]
+        self._runtime_error_window_started_at = self._utc_now()
 
     async def _get_app_uri(self) -> str:
         if self._app_uri is not None:
@@ -149,13 +212,31 @@ class FlutterRuntimeAdapter:
 
     async def _call_text(self, tool_name: str, arguments: dict[str, Any]) -> str:
         started_at = monotonic()
+        started_at_utc = self._utc_now()
         try:
             result = await self._mcp_toolset.direct_call_tool(tool_name, arguments)
         except ToolError as error:
-            self._record_call(tool_name, arguments, started_at, str(error))
+            self._record_call(
+                tool_name,
+                arguments,
+                started_at,
+                started_at_utc,
+                "tool_error",
+                str(error),
+            )
+            raise
+        except Exception as error:
+            self._record_call(
+                tool_name,
+                arguments,
+                started_at,
+                started_at_utc,
+                "transport_error",
+                str(error),
+            )
             raise
         text = result if isinstance(result, str) else json.dumps(result, ensure_ascii=False)
-        self._record_call(tool_name, arguments, started_at, text)
+        self._record_call(tool_name, arguments, started_at, started_at_utc, "success", text)
 
         return text
 
@@ -164,15 +245,21 @@ class FlutterRuntimeAdapter:
         tool_name: str,
         arguments: dict[str, Any],
         started_at: float,
+        started_at_utc: str,
+        outcome: str,
         output: str,
     ) -> None:
         self._calls.append(
             UnderlyingMCPCall(
+                call_id=f"mcp-{len(self._calls) + 1:04d}",
+                started_at_utc=started_at_utc,
                 tool_name=tool_name,
                 arguments=arguments,
                 duration_seconds=monotonic() - started_at,
+                outcome=outcome,
                 output_characters=len(output),
                 output=output,
+                output_sha256=sha256(output.encode("utf-8")).hexdigest(),
             )
         )
 
@@ -181,50 +268,104 @@ class FlutterRuntimeAdapter:
         error_text = str(error)
         return "Unsupported operation:" in error_text and "getText" in error_text
 
+    def _runtime_observation_from_raw(self, raw_errors: str) -> RuntimeErrorObservation:
+        """Normalize structured MCP content while retaining raw evidence privately."""
+        self._runtime_observation_count += 1
+        fragments = self._runtime_text_fragments(raw_errors)
+        non_error_markers = [
+            fragment
+            for fragment in fragments
+            if fragment.strip() != "No runtime errors found."
+            and self._RUNTIME_ERROR_COUNT_PATTERN.search(fragment) is None
+        ]
+        errors = [
+            self._runtime_error_item(fragment, index)
+            for index, fragment in enumerate(non_error_markers, start=1)
+            if fragment.strip()
+        ]
+        return RuntimeErrorObservation(
+            observation_id=self._runtime_observation_id(),
+            scope=self._runtime_scope(),
+            status="observed",
+            error_count=len(errors),
+            errors=errors,
+        )
+
     @staticmethod
-    def _compact_runtime_errors(raw_errors: str) -> str:
-        """Return official runtime-error data without MCP transport envelopes."""
+    def _runtime_text_fragments(raw_errors: str) -> list[str]:
+        """Extract text content from supported Dart MCP response envelopes."""
         try:
             payload = json.loads(raw_errors)
         except json.JSONDecodeError:
-            return json.dumps(
-                {"error_count": 1, "errors": [raw_errors.strip()]},
-                ensure_ascii=False,
-                separators=(",", ":"),
-            )
+            return [raw_errors]
 
-        if not isinstance(payload, list):
-            return json.dumps(
-                {"error_count": 1, "errors": [str(payload)]},
-                ensure_ascii=False,
-                separators=(",", ":"),
-            )
+        def text_items(value: object) -> list[str]:
+            if isinstance(value, str):
+                return [value]
+            if isinstance(value, list):
+                return [text for item in value for text in text_items(item)]
+            if isinstance(value, dict):
+                text = value.get("text")
+                if isinstance(text, str):
+                    return [text]
+                content = value.get("content")
+                if content is not None:
+                    return text_items(content)
+            return []
 
-        error_count: int | None = None
-        errors: list[str] = []
-        for item in payload:
-            item_text = str(item).strip()
-            count_match = FlutterRuntimeAdapter._RUNTIME_ERROR_COUNT_PATTERN.search(item_text)
-            if count_match:
-                error_count = int(count_match.group(1))
-                continue
-            if item_text == "No runtime errors found.":
-                error_count = 0
-                continue
-            summary_match = FlutterRuntimeAdapter._RUNTIME_ERROR_SUMMARY_PATTERN.search(item_text)
-            if summary_match:
-                errors.append(
-                    f"{summary_match.group('type').strip()}: "
-                    f"{summary_match.group('summary').strip()}"
-                )
-            else:
-                errors.append(" ".join(item_text.split())[:300])
+        fragments = text_items(payload)
+        return fragments or [raw_errors]
 
-        return json.dumps(
-            {"error_count": error_count if error_count is not None else len(errors), "errors": errors},
-            ensure_ascii=False,
-            separators=(",", ":"),
+    def _runtime_error_item(self, fragment: str, index: int) -> RuntimeErrorItem:
+        summary_match = self._RUNTIME_ERROR_SUMMARY_PATTERN.search(fragment)
+        if summary_match:
+            category = summary_match.group("type").strip()
+            message = summary_match.group("summary").strip()
+        else:
+            category = "runtime_error"
+            message = " ".join(fragment.split())[:300]
+        raw_hash = self._calls[-1].output_sha256 if self._calls else sha256(
+            fragment.encode("utf-8")
+        ).hexdigest()
+        return RuntimeErrorItem(
+            category=category,
+            message=message,
+            raw_evidence_ref=(
+                f"tool_events.json#sha256:{raw_hash}:fragment:{index}"
+            ),
         )
+
+    def _failure_runtime_observation(
+        self,
+        *,
+        status: Literal["unavailable", "tool_error"],
+        code: str,
+        message: str,
+    ) -> RuntimeErrorObservation:
+        self._runtime_observation_count += 1
+        return RuntimeErrorObservation(
+            observation_id=self._runtime_observation_id(),
+            scope=self._runtime_scope(),
+            status=status,
+            reason=RuntimeErrorReason(code=code, message=message),
+        )
+
+    def _runtime_scope(self) -> RuntimeErrorScope:
+        now = self._utc_now()
+        return RuntimeErrorScope(
+            app_session_id=self._runtime_session_id or "unavailable",
+            since=self._runtime_error_window_started_at or now,
+            until=now,
+            clear_before_observation=self._runtime_error_window_started_at is not None,
+        )
+
+    def _runtime_observation_id(self) -> str:
+        session_id = self._runtime_session_id or "unavailable"
+        return f"runtime-errors-{session_id}-{self._runtime_observation_count:04d}"
+
+    @staticmethod
+    def _utc_now() -> str:
+        return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
     @staticmethod
     def _first_uri(text: str, pattern: re.Pattern[str], label: str) -> str:

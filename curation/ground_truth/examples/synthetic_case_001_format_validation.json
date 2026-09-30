@@ -1,0 +1,30 @@
+{
+  "schema_version": "1",
+  "record_purpose": "format_validation_example",
+  "case_id": "SYNTHETIC-CASE-001",
+  "source_repository": "local://flutter-bug-reproduction-pilot",
+  "issue_reference": "issues/case_001.md",
+  "case_git_revision": "ab40aea202c4955cd1c75e7db85233aae6b05037",
+  "issue_snapshot_path_or_hash": "sha256:7852ed1df53bacbd2caa20655cd6d775afedf821d5a031809cf990a2e51193c0",
+  "flutter_version": "3.47.1",
+  "dart_version": "3.13.1",
+  "platform": "synthetic-pilot-format-validation-only",
+  "setup_instructions": "For format validation only: launch lib/main_case_001.dart, begin from Count: 0, tap the + button once, and observe the displayed count.",
+  "reproduction_predicate": {
+    "description": "After one press of the + button from Count: 0, the displayed count remains Count: 0.",
+    "evaluation_method": "An independent curator checks retained before-and-after visible text evidence from the synthetic pilot; no automated score is produced."
+  },
+  "expected_observable_evidence": [
+    "Visible Count: 0 before the action.",
+    "A recorded + button action.",
+    "Visible Count: 0 after the action."
+  ],
+  "defect_class": "incorrect_application_state",
+  "subtype": "stale_state_after_action",
+  "manual_verification": {
+    "verified": false,
+    "verification_date": null,
+    "verifier_id": "format-validation-only",
+    "notes": "Synthetic pilot format example only; it is not a public case and must not enter the formal dataset."
+  }
+}

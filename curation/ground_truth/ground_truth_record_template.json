@@ -1,0 +1,28 @@
+{
+  "schema_version": "1",
+  "record_purpose": "formal_ground_truth",
+  "case_id": "PUB-001",
+  "source_repository": "https://example.invalid/owner/repository",
+  "issue_reference": "https://example.invalid/owner/repository/issues/123",
+  "case_git_revision": "40-character-or-equivalent-pinned-revision",
+  "issue_snapshot_path_or_hash": "sha256:...",
+  "flutter_version": "3.x.y",
+  "dart_version": "3.x.y",
+  "platform": "android-emulator-api-...",
+  "setup_instructions": "Exact curator-verified setup and reset steps.",
+  "reproduction_predicate": {
+    "description": "Observable condition that establishes the reported defect.",
+    "evaluation_method": "Manual/evidence-based procedure for the independent scorer."
+  },
+  "expected_observable_evidence": [
+    "Required UI, runtime, widget, log, or other retained observation."
+  ],
+  "defect_class": "incorrect_application_state",
+  "subtype": "stale_state_after_action",
+  "manual_verification": {
+    "verified": false,
+    "verification_date": null,
+    "verifier_id": "curator-identifier",
+    "notes": "Known constraints and reset expectations."
+  }
+}

@@ -4,6 +4,9 @@ import csv
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+from typing import Any, Mapping, Sequence
+
+from formal_contracts import FormalRunMetadata
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -29,8 +32,10 @@ def persist_run(
     duration_seconds: float,
     turns: int,
     messages_json: str,
+    tool_events: Sequence[Mapping[str, Any]] = (),
+    formal_metadata: FormalRunMetadata | None = None,
 ) -> tuple[str, Path, Path]:
-    """Persist one agent-reported result and its unmodified PydanticAI trace."""
+    """Persist pilot evidence plus optional versioned formal-run sidecars."""
     json.loads(messages_json)
     run_id, run_directory = _create_run_directory(case)
     result_path = run_directory / "result.json"
@@ -50,6 +55,16 @@ def persist_run(
         encoding="utf-8",
     )
     trace_path.write_text(messages_json + "\n", encoding="utf-8")
+    if tool_events:
+        (run_directory / "tool_events.json").write_text(
+            json.dumps(list(tool_events), ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+    if formal_metadata is not None:
+        (run_directory / "formal_metadata.json").write_text(
+            formal_metadata.model_dump_json(indent=2) + "\n",
+            encoding="utf-8",
+        )
     _append_summary_row(
         case=case,
         model=model,
