@@ -2,599 +2,334 @@
 
 ## Purpose of This Plan
 
-Use this file as the execution plan for building the project described in `README.md`.
-
-This plan is intentionally staged.
-
-**Do not implement the entire project in one pass.**
+This is the operational staged plan for the project described in `README.md`.
 
 For every stage:
 
-1. work on **this stage only**;
-2. do not begin or pre-implement anything from the next stage;
-3. run every test/check listed for the current stage;
-4. fix failures before declaring the stage complete;
-5. if manual user action is needed, stop and ask for that exact action before continuing;
-6. commit the completed stage to local Git with a meaningful message;
-7. verify `git status` is clean;
-8. provide the required end-of-stage report;
-9. **stop and wait for explicit user approval.**
+1. work on this stage only;
+2. do not pre-implement a later stage;
+3. run the listed checks and record actual outcomes;
+4. distinguish tool success, build success, and runtime/artifact evidence;
+5. commit a completed implementation stage with a meaningful local Git message;
+6. verify `git status --short` is clean before declaring completion;
+7. report the stage result and stop for explicit user approval.
 
-One Claude/Codex chat/session should handle one stage only. The next stage should normally begin in a new chat/session after the previous stage has been approved.
-
-Do not silently continue into later stages. Do not guess around missing prerequisites. The user may need to install software, download models, approve permissions, launch a simulator/emulator, configure LM Studio, configure MCP, or manually verify Flutter behavior. Ask for that action explicitly when needed.
+If a stage requires manual action or an unavailable prerequisite, stop and request the exact action. Do not guess around it, replace it with unverified evidence, or continue into a later stage.
 
 ---
 
-# Stage 0 — Inspect the Environment
+# Completed Stages
 
-## Goal
+The following stages are historical project checkpoints. They are complete and must not be repeated or silently redesigned while beginning later work.
 
-Understand the current machine and directory before creating anything substantial.
+## Stage 0 — Inspect the Environment
 
-## Tasks
+**Status: COMPLETE**
 
-1. Read `README.md` completely.
-2. Inspect the current directory.
-3. Check whether the following are installed and accessible:
-   - Flutter;
-   - Dart;
-   - Python 3;
-   - `pip`/virtual environments;
-   - Git;
-   - LM Studio command/server availability if detectable;
-   - Android/iOS simulator or emulator tooling;
-   - Flutter/Dart MCP tooling if already configured.
-4. Record detected versions.
-5. Do not install major dependencies automatically unless it is clearly safe and local to the repository.
+The initial machine, Flutter/Dart/Python/Git availability, local model setup, device/emulator situation, and Flutter/Dart MCP prerequisites were inspected before implementation.
 
-## Tests
+## Stage 1 — Create the Minimal Repository Structure
 
-Run version/availability checks such as:
+**Status: COMPLETE**
 
-```bash
-flutter --version
-dart --version
-python3 --version
-git --version
-```
+The repository, Git baseline, Python agent area, Flutter area, issue area, result storage area, and ignore rules were established.
 
-Check Flutter devices:
+## Stage 2 — Create the Flutter Pilot Application
 
-```bash
-flutter devices
-```
+**Status: COMPLETE**
 
-## User attendance may be required for
+One Flutter application with independent launch entry points for five small deterministic cases was created. Each case can be reset through a fresh launch.
 
-- installing Flutter or Python if missing;
-- opening/starting an emulator or simulator;
-- installing LM Studio;
-- approving macOS permissions;
-- locating an already installed Flutter/Dart MCP configuration.
+## Stage 3 — Create Matching Issue Files
 
-## Completion criteria
+**Status: COMPLETE**
 
-A short environment report exists and we know which prerequisites are present or missing.
+Each synthetic case received an agent-visible natural-language issue description without source-level solution disclosure.
 
-**STOP after reporting the result. Wait for user approval.**
+## Stage 4C — Preserve Investigation and Migrate Cleanly to PydanticAI
 
----
+**Status: COMPLETE**
 
-# Stage 1 — Create the Minimal Repository Structure
+The main runtime moved to PydanticAI 2.51.0 while preserving the earlier framework investigation separately. The current development model is configurable `qwen2.5-7b-instruct` through LM Studio's OpenAI-compatible endpoint. The model-facing tool surface remained generic and the framework retained full message history and typed results.
 
-## Goal
+## Stage 5 — First Reliable Flutter Interaction
 
-Create only the simple folder/file structure defined in `README.md`.
+**Status: COMPLETE**
 
-## Target structure
+CASE_001 validated the operational path from compact inspection through interaction and post-action observation. Infrastructure success and semantic self-assessment agreement were recorded separately.
+
+## Stage 6 — First Issue-Driven Bug Reproduction
+
+**Status: COMPLETE**
+
+The system completed the path:
 
 ```text
-flutter-bug-reproduction/
-│
-├── README.md
-├── plan.md
-│
-├── flutter_app/
-├── issues/
-├── agent/
-│   ├── main.py
-│   ├── models.py
-│   ├── capabilities.py
-│   └── tools.py
-│
-├── results/
-│   ├── runs/
-│   └── summary.csv
-│
-├── requirements.txt
-└── .gitignore
-```
-
-## Tasks
-
-1. Create missing directories.
-2. Initialize a **local Git repository** in the project root if one does not already exist.
-3. Create a Python virtual environment, preferably `.venv/`.
-4. Create a clean `.gitignore` covering `.venv`, Python caches, Flutter/Dart build/generated files, IDE noise, local LM Studio/model artefacts if any, simulator/emulator noise, and temporary runtime output that should not be versioned.
-5. Keep Python files minimal placeholders at this stage.
-6. Initialize `results/summary.csv` with a small header only.
-7. Create the initial baseline commit after the structure and files have passed the stage tests.
-
-Suggested initial header:
-
-```csv
-case,model,capabilities,status,steps,duration_seconds
-```
-
-## Tests
-
-- verify the directory structure;
-- verify `git rev-parse --is-inside-work-tree` succeeds;
-- inspect `.gitignore` and confirm expected generated/local files are ignored;
-- activate the virtual environment;
-- verify Python runs from the virtual environment;
-- verify placeholder Python files import without syntax errors;
-- create the baseline commit;
-- verify `git status --short` returns no pending changes.
-
-Example:
-
-```bash
-python -m py_compile agent/*.py
-```
-
-## Completion criteria
-
-The repository structure exists and contains no unnecessary architecture.
-
-**STOP after reporting the result. Wait for user approval.**
-
----
-
-# Stage 2 — Create the Flutter Pilot Application
-
-## Goal
-
-Create one Flutter project with multiple independent case entry points.
-
-## Tasks
-
-1. Create the Flutter project inside `flutter_app/`.
-2. Keep dependencies minimal.
-3. Add five case folders under:
-
-```text
-flutter_app/lib/cases/
-```
-
-4. Add five neutral entry points:
-
-```text
-lib/main_case_001.dart
-lib/main_case_002.dart
-lib/main_case_003.dart
-lib/main_case_004.dart
-lib/main_case_005.dart
-```
-
-5. Avoid filenames that reveal the exact bug type to the agent.
-6. Each entry point must launch only its corresponding case.
-
-## Suggested cases
-
-### CASE 001 — State update failure
-
-A simple counter or state value fails to update after interaction.
-
-### CASE 002 — Runtime exception
-
-A user action produces an unhandled exception.
-
-### CASE 003 — Navigation/flow problem
-
-A multi-step flow leads to an incorrect route/screen/state.
-
-### CASE 004 — Structural widget problem
-
-A widget becomes missing, duplicated, or otherwise structurally incorrect.
-
-### CASE 005 — Silent async/runtime problem
-
-An asynchronous operation fails or leaves incorrect state without crashing the app.
-
-Keep each case small and deterministic.
-
-## Tests
-
-Run every entry point manually:
-
-```bash
-flutter run -t lib/main_case_001.dart
-flutter run -t lib/main_case_002.dart
-flutter run -t lib/main_case_003.dart
-flutter run -t lib/main_case_004.dart
-flutter run -t lib/main_case_005.dart
-```
-
-The user may perform the actual interaction if needed.
-
-For every case verify:
-
-- it starts successfully;
-- only the intended scenario appears;
-- the expected bug can be reproduced manually;
-- restarting the app resets the case to a clean initial state.
-
-## User attendance required
-
-Ask the user to manually confirm each case's behavior if automatic confirmation is not straightforward.
-
-Do not proceed until all five cases are intentionally reproducible.
-
-## Completion criteria
-
-Five deterministic Flutter cases exist and can be launched independently.
-
-**STOP after reporting the result. Wait for user approval.**
-
----
-
-# Stage 3 — Create the Matching Issue Files
-
-## Goal
-
-Give every case a natural-language issue report that can later be supplied to the agent.
-
-## Tasks
-
-Create:
-
-```text
-issues/case_001.md
-issues/case_002.md
-issues/case_003.md
-issues/case_004.md
-issues/case_005.md
-```
-
-Each issue should contain only information a realistic bug report might reasonably contain:
-
-- title;
-- short description;
-- expected behavior;
-- actual behavior;
-- reproduction hints/steps only where appropriate.
-
-Do not reveal:
-
-- faulty file names;
-- faulty line numbers;
-- implementation explanation;
-- hidden solution;
-- internal case folder name if avoidable.
-
-## Tests
-
-For each issue:
-
-1. read the issue without looking at the source;
-2. confirm that a human can understand what behavior should be reproduced;
-3. confirm it does not expose the implementation of the bug.
-
-## User attendance may be required
-
-Ask the user to review the five issue descriptions and approve their realism/difficulty.
-
-## Completion criteria
-
-Five issue files correspond cleanly to the five Flutter cases.
-
-**STOP after reporting the result. Wait for user approval.**
-
----
-
-# Stage 4C — Preserve Investigation and Migrate Cleanly to PydanticAI
-
-## Goal
-
-Preserve the Phase 4 framework investigation, restore a clean Phase 1–3 main base, and migrate only the agent layer to PydanticAI for CASE_001 infrastructure validation.
-
-## Tasks
-
-1. Archive the uncommitted OpenAI Agents SDK runtime work, generic Flutter adapter, framework-comparison spike, and PydanticAI traces in a meaningful commit without rewriting Phase 1–3 history.
-2. Restore `main` to the clean Phase 1–3 base.
-3. Use `pydantic-ai==2.51.0` and do not retain OpenAI Agents SDK lifecycle work on `main`.
-4. Keep `agent/main.py`, `agent/models.py`, `agent/capabilities.py`, and `agent/tools.py` as the primary agent files.
-5. Support configurable `qwen2.5-7b-instruct` through `http://127.0.0.1:1234/v1` without hardcoded secrets.
-6. Keep only `FULL` and generic model-facing `inspect_app()`, `get_text(target)`, and `tap(target)` tools.
-7. Use `summaryOnly: true` inspection and normalize it into ValueKey targets; keep DTD, raw inspector, and Flutter Driver details private.
-8. Use typed `before_value` / `after_value` output, normal PydanticAI termination, and `result.all_messages()`; do not force tool choice, add a custom loop, or correct a wrong semantic result.
-9. Validate CASE_001 three times from clean app state. Record semantic disagreement separately; do not retry merely because the answer is wrong.
-
-## Tests
-
-- dependency installation/check and `pip check`;
-- `python -m py_compile agent/*.py`;
-- `flutter analyze`, `git diff --check`, and an artifact check;
-- three clean CASE_001 infrastructure validations with runtime evidence.
-
-## Completion criteria
-
-The archive is safe, the PydanticAI migration passes all checks and three CASE_001 infrastructure validations, and the working tree is clean after the Stage 4C commit.
-
-**STOP after reporting the result. Wait for user approval.**
-
----
-
-# Stage 5 — First Reliable Flutter Interaction
-
-## Goal
-
-Validate the clean PydanticAI implementation on CASE_001 with a simple operational instruction, without using the issue report yet.
-
-## Tasks
-
-Use CASE_001 only.
-
-1. Start CASE_001 from a clean/reset state.
-2. Give the agent a simple operational instruction equivalent to:
-
-```text
-Inspect the running application.
-Read the current counter value.
-Press the + button once.
-Read the counter value again.
-Return the observed before and after values.
-```
-
-3. Use only the existing `FULL` capability set.
-4. Keep the model-facing tools generic:
-   - `inspect_app()`
-   - `get_text(target)`
-   - `tap(target)`
-5. Do not hardcode CASE_001 selectors, expected values, or a fixed Python workflow.
-6. Do not load `issues/case_001.md` yet.
-7. Do not automatically correct a wrong typed result.
-
-## Tests
-
-Run three clean attempts and record the real tool sequence, selected targets, before/after runtime observations, typed result, semantic agreement, duration/turns where available, termination behavior, trace retention, and any redundant or unexpected actions.
-
-Infrastructure PASS means inspection, interaction, post-interaction observation delivery, typed output, natural termination, and trace retention all work. A semantically wrong model result is not automatically an infrastructure failure.
-
-## Completion criteria
-
-Three clean CASE_001 interaction-validation runs complete successfully at the infrastructure level, with semantic disagreement recorded separately.
-
-Suggested commit:
-
-```text
-phase 5: validate flutter interaction flow
-```
-
-**STOP after reporting the result. Wait for user approval.**
-
----
-
-# Stage 6 — First Issue-Driven Bug Reproduction
-
-## Goal
-
-Run the first actual research-style bug-reproduction attempt from a natural-language issue report.
-
-## Tasks
-
-1. Launch CASE_001 in a clean/reset state.
-2. Load `issues/case_001.md`.
-3. Give the issue to the agent with a concise, generic reproduction instruction.
-4. Let the agent decide how to inspect and interact with the app.
-5. Do not reveal implementation details, hidden selectors, expected values, or the known reproduction outcome.
-6. Return a typed self-assessment, for example:
-
-```text
-status:
-  REPRODUCED | NOT_REPRODUCED | INCONCLUSIVE
-
-confidence:
-  optional bounded value if useful
-
-evidence:
-  short supporting explanation
-```
-
-7. Do not automatically correct the model's final judgement against runtime evidence.
-8. Keep runtime/tool evidence separate from the agent-reported result.
-
-## Tests
-
-Verify whether the agent understood the issue report, used the available Flutter runtime tools, attempted the relevant interaction, observed the resulting behavior, terminated naturally, produced a typed self-assessment, and retained a complete trace.
-
-For this first pilot, independently verify whether the agent's conclusion matches the actual CASE_001 behavior.
-
-## Completion criteria
-
-One complete path works:
-
-```text
-issue file
+agent-visible issue
 → PydanticAI agent
 → Flutter runtime tools
-→ runtime observations
-→ typed self-assessment
+→ observations
+→ typed agent self-assessment
 ```
+
+The runner retained the model's actual conclusion rather than replacing it with hidden ground truth.
+
+## Stage 7 — Add Result Storage
+
+**Status: COMPLETE**
+
+Completed runs are persisted under `results/runs/<run-id>/` with a result record, serialized trace, and summary row. Storage is append-only at the run level; prior results are not overwritten.
+
+## Stage 8 — Run All Five Pilot Cases
+
+**Status: COMPLETE**
+
+The five synthetic cases were run with the common development baseline. The pilot established engineering viability across state, runtime-exception, navigation, structural, and silent-failure behavior. These results are not a formal dataset or formal evaluation result.
+
+## Stage 8A — Add Runtime-Error Observation and Generic Robustness
+
+**Status: COMPLETE**
+
+Generic robustness was added based on pilot evidence:
+
+- `get_runtime_errors()` exposes runtime-error observations;
+- unsupported reads and invalid targets are normal tool outcomes instead of terminal Python failures;
+- passive visible text supports structural inspection where appropriate;
+- a successful tap invalidates discovered targets, requiring a new `inspect_app()` before a route-dependent read or action.
+
+No case-specific selector, retry, or answer-correction behavior is allowed.
+
+## Stage 9 — Review Before Expansion
+
+**Status: COMPLETE**
+
+The pilot was reviewed before formal expansion. The resulting decisions were:
+
+- PydanticAI is the development orchestration baseline;
+- qwen2.5-7b-instruct is adequate for development, not yet the formal model;
+- current tools are sufficient for the pilot but not the complete formal RQ2 capability set;
+- synthetic positive cases do not constitute a defensible public benchmark;
+- formal protocol, curation contracts, and a public-case workflow are required before formal experiments.
+
+## Stage 10 — Define the Formal RQ1/RQ2 Evaluation Protocol
+
+**Status: COMPLETE**
+
+The formal protocol now defines:
+
+- RQ1's separate outcomes: independent reproduction predicate and agent self-assessment correctness;
+- resettable, independent formal trials and planned repeated runs;
+- formal reporting, including reproduction rate, false positives/negatives, abstentions, duration, turns, and infrastructure exclusions;
+- the prospective public dataset target of approximately 25 real cases across four defect classes;
+- a bounded model-selection pre-study before selecting the formal model;
+- a future `FULL` capability set and RQ2 ablation conditions;
+- separation of research conclusions from engineering-pilot results.
+
+## Stage 11 — Add Formal Readiness Contracts
+
+**Status: COMPLETE**
+
+Formal readiness contracts now cover:
+
+- curator-only ground-truth records and independent observable predicates;
+- agent-visible versus curator-only information separation;
+- public-case intake checklist;
+- formal run metadata;
+- per-tool audit records;
+- typed runtime-error observations, including unambiguous zero-error observations;
+- templates and directory conventions for curated cases.
+
+Stage 11 does not create the formal public dataset, select the formal model, implement missing capabilities, or run formal RQ1/RQ2 trials.
+
+---
+
+# Stage 12 — Experimental Stateful Public Flutter Bug Curation
+
+## Goal
+
+Test the public-case curation workflow on a small sample of real public Flutter bug reports. This is a curator experiment, not dataset collection for formal evaluation and not an evaluation of the reproduction agent.
+
+## Scope
+
+The curator may:
+
+- search public GitHub issues and public repositories;
+- inspect issue bodies, relevant comments, exact comment permalinks, and linked MREs;
+- clone a public MRE or make a temporary project around an exact inline sample;
+- build/run the candidate manually and inspect local runtime behavior;
+- create/update the persistent curation tracking files and curator-only case material.
+
+The curator must not:
+
+- modify the reproduction agent, agent prompt, PydanticAI, development model, synthetic cases, or formal research tools;
+- invoke the reproduction/evaluation agent;
+- begin model selection, formal data collection, formal RQ1/RQ2 experiments, or capability implementation;
+- repair, simplify, or silently rewrite a public MRE to create an easier bug.
+
+## Preflight
+
+1. Read `README.md`, the Stage 10 formal protocol, Stage 11 templates/checklists, and current `curation/` documentation.
+2. Inspect existing `curation/search_state.csv` and `curation/candidates.csv`; create either only if absent and with the agreed headers.
+3. Preserve every existing record. Do not overwrite or remove prior entries.
+4. Confirm the local Flutter runtime and emulator/device available for candidate validation.
+
+## Persistent state
+
+Maintain `curation/search_state.csv` with at least:
+
+```csv
+source_type,url,parent_url,visited_at_utc,outcome,candidate_id,notes
+```
+
+Record every issue, comment permalink, MRE link/repository, or other candidate page substantively inspected. Canonicalize a URL before checking it. If its page or candidate has already been evaluated, rejected, deferred, or accepted, skip it unless the user explicitly asks to reopen it.
+
+Maintain `curation/candidates.csv` with at least:
+
+```csv
+candidate_id,repository,issue_url,mre_url,status,defect_class,build_status,reproduction_status,rejection_reason,notes
+```
+
+Permitted statuses are:
+
+```text
+discovered
+triaging
+testing
+accepted
+rejected
+deferred
+```
+
+Never delete rejected candidates. Search state is broad memory; the candidate table contains only material promoted to genuine candidacy.
+
+## Candidate search and triage
+
+Prefer public Flutter reports with an inline or linked MRE, deterministic steps, an objective outcome, and a source revision that can be recorded. Inspect relevant comments: a reproduction repository often appears only in a comment.
+
+Initial sources may include:
+
+- `flutter/flutter` issues;
+- `flutter/packages` issues;
+- public Flutter package/plugin repositories;
+- public open-source Flutter applications with small supplied MREs.
+
+Useful discovery phrases include `minimal reproducible`, `minimal reproduction`, `minimal example`, `minimal code sample`, `reproduction repository`, `reproduction repo`, `sample project`, and `reproducible example`. Do not restrict discovery to these exact phrases.
+
+For each previously unseen candidate:
+
+1. record it immediately in `candidates.csv` as `discovered` or `triaging`;
+2. record each substantively inspected page in `search_state.csv`;
+3. locate the MRE and capture provenance;
+4. classify provisionally as `unhandled_exception`, `incorrect_application_state`, `structural_rendering_fault`, or `silent_error_condition`;
+5. identify whether a binary, independently observable predicate appears possible;
+6. reject early when the intake criteria are clearly not met, recording the precise reason.
+
+Reject or defer candidates requiring proprietary/authenticated backends, paid services, private credentials, uncontrolled external data, push services, inaccessible hardware/sensors, unsupported/discontinued toolchains, subjective-only visual judgement, engine/compiler rebuilding, security-sensitive workflows, or huge applications without an MRE.
+
+## MRE handling and validation
+
+For a linked repository:
+
+- record public URL and exact tested revision;
+- clone/obtain it only for local curator validation;
+- do not silently modify behavior;
+- record any compatibility modification and reject/defer when substantial reconstruction is necessary.
+
+For an inline sample:
+
+- use supplied code faithfully in a temporary Flutter project;
+- record scaffolding and version assumptions;
+- do not create a new bug or make substantive code changes.
+
+For a viable candidate, build and run it, follow the reported steps, reset it as needed, and collect sufficient local evidence to decide whether the reported behavior occurs. A build or successful tap alone is not reproduction evidence.
+
+If manually reproduced:
+
+1. set status to `accepted` and reproduction status to `reproduced`;
+2. assign a defect class;
+3. store it under `curation/accepted/<defect_class>/<case_id>/` using the Stage 11 contract;
+4. retain issue/MRE/revision/environment provenance;
+5. record concise curator reproduction notes and the independent predicate;
+6. keep ground truth, expected evidence, and curator knowledge hidden from the later evaluation agent;
+7. flag solution-leakage risks in the issue material, without finalizing the agent-visible snapshot.
+
+If not reproduced, record `rejected` or `deferred` and one precise reason such as:
+
+```text
+missing_mre
+build_failure
+dependency_obsolete
+cannot_reproduce
+environment_mismatch
+external_service_required
+subjective_predicate
+solution_leakage
+unsupported_platform
+```
+
+## Stop condition
+
+Stop immediately at the first of:
+
+- two accepted, manually reproduced cases; or
+- five previously unseen candidates fully attempted.
+
+Do not continue searching just to improve acceptance numbers.
+
+## Checks
+
+- tracking CSVs retain all existing rows and parse consistently;
+- every substantive inspected URL is represented in search state;
+- every attempted candidate has an outcome and reason;
+- every accepted case has pinned provenance, environment record, manual reproduction evidence, objective predicate, and hidden ground truth;
+- no evaluation-agent, agent-runtime, model, or formal-study files changed;
+- Git diff confirms the stage stayed within curation scope.
+
+## Completion criteria
+
+The experiment reaches its stop condition with a transparent ledger of accepted, rejected, and deferred candidates, and an evidence-backed final report. Do not claim the output is the formal dataset.
 
 Suggested commit:
 
 ```text
-phase 6: add first issue driven reproduction
+stage 12: run stateful public-case curation experiment
 ```
 
 **STOP after reporting the result. Wait for user approval.**
 
 ---
 
-# Stage 7 — Add Simple Result Storage
+# Subsequent Stages — Do Not Start Yet
 
-## Goal
+## Stage 13 — Broader Public-Case Curation
 
-Persist each run in a consistent but lightweight format.
+**Goal:** Scale only the validated curation workflow toward the approximately 25-case public dataset, preserving defect-class balance, difficulty distribution, multi-repository coverage, provenance, resetability, manual reproduction, independent predicates, leakage review, and a full rejected/deferred ledger.
 
-## Tasks
+**Boundary:** This remains curation. It does not evaluate the agent, tune the agent to cases, or select the model.
 
-For each run create:
+## Stage 14 — Model-Selection Pre-Study
 
-```text
-results/runs/<run-id>/
-```
+**Goal:** Use a bounded calibration set (approximately 6–8 suitable non-formal cases) to compare a small predefined set of candidate models under one fixed generic prompt, tools, and budget. Select the formal model by the recorded pre-study criteria, not by anecdote.
 
-At minimum save:
+**Boundary:** Calibration cases must be segregated from the final formal evaluation dataset. Do not alter agent behavior because one model struggles on one case.
 
-```text
-result.json
-trace.txt
-```
+## Stage 15 — Implement Missing Formal Capabilities and Freeze
 
-When available also save:
+**Goal:** Implement only genuinely missing generic formal capabilities, such as text entry/scrolling when justified, source inspection, and temporary instrumentation/hot reload. Define and test the future `FULL` and ablation manifests; then freeze prompt, tool definitions/versions, model, sampling settings, budgets, environment, dataset, predicates, and analysis plan.
 
-```text
-flutter.log
-screenshot.png
-```
+**Boundary:** A missing general capability may justify infrastructure work. A model's inability to solve a particular case is a research result, not a reason for case-specific adaptation.
 
-Suggested `result.json` fields:
+## Stage 16 — Formal RQ1/RQ2 Evaluation
 
-```json
-{
-  "case": "001",
-  "model": "local",
-  "capabilities": "full",
-  "status": "reproduced",
-  "steps": 0,
-  "duration_seconds": 0
-}
-```
+**Goal:** Run the frozen protocol on the frozen public dataset. For RQ1, report independent reproduction and self-assessment correctness separately. For RQ2, run only the pre-specified capability ablations. Retain traces, audit events, metadata, predicates, exclusions, and analysis artifacts.
 
-Use actual values. Do not fabricate token counts or step counts when the framework/runtime does not expose them reliably.
-
-Append one row to:
-
-```text
-results/summary.csv
-```
-
-## Tests
-
-Run CASE_001 once and confirm a unique run folder is created, previous runs are not overwritten, `result.json` is valid JSON, `summary.csv` receives one matching row, and the stored result matches the actual run.
-
-## Completion criteria
-
-One complete run is persisted successfully.
-
-**STOP after reporting the result. Wait for user approval.**
-
----
-
-# Stage 8 — Run All Five Pilot Cases
-
-## Goal
-
-Determine whether the basic system works across more than one bug type.
-
-## Tasks
-
-Run each case once using:
-
-- the same local model;
-- the same agent instructions;
-- the same FULL capabilities;
-- a clean app state before each run.
-
-Cases:
-
-```text
-001
-002
-003
-004
-005
-```
-
-Do not optimize the prompt for individual cases unless a genuinely general problem is discovered.
-
-## Tests
-
-For every case record:
-
-- final agent status;
-- whether independent/runtime evidence agrees;
-- rough duration;
-- step/turn count if available;
-- obvious failure reason if unsuccessful.
-
-Inspect `results/summary.csv` after all five runs.
-
-## Completion criteria
-
-The system has attempted all five cases and produced a small first dataset of results.
-
-**STOP after reporting the result. Wait for user approval.**
-
----
-
-# Stage 9 — Review Before Expanding
-
-## Goal
-
-Do not add more architecture until the pilot tells us what is actually missing.
-
-## Review questions
-
-After the five-case pilot, report:
-
-1. Is the local model capable enough?
-2. Does tool calling work reliably?
-3. Does Flutter/Dart MCP expose the capabilities we actually need?
-4. Which actions still require custom tools, if any?
-5. Are agent traces understandable enough for research analysis?
-6. Are result files sufficient?
-7. Are issue descriptions too easy, too difficult, or realistic enough?
-8. Which failures are caused by:
-   - model reasoning;
-   - tool limitations;
-   - Flutter environment;
-   - issue wording;
-   - agent configuration?
-9. Is PydanticAI still sufficiently neutral and unobtrusive for the formal study?
-10. What must be frozen before formal evaluation?
-
-## Do not implement yet
-
-Do not automatically add:
-
-- multiple-model experiments;
-- capability ablation;
-- automated ground-truth evaluation;
-- complex experiment definitions;
-- separate benchmark framework;
-- real GitHub case importers;
-- multi-agent architecture;
-- vector databases/RAG;
-- autonomous patching/debugging.
-
-Those decisions come only after reviewing the pilot.
-
-## Completion criteria
-
-Produce a short pilot review and recommendation for the next phase.
-
-**STOP and wait for user approval.**
+**Boundary:** No capability, prompt, model, or dataset changes after formal trials start without a documented protocol amendment and a new clearly separated study phase.
 
 ---
 
 # Required End-of-Stage Report
 
-Every stage must end with a compact report in this exact spirit:
+Every stage ends with a concise report in this form:
 
 ```text
 Stage: <number and name>
@@ -606,10 +341,10 @@ Implemented:
 Files changed:
 - ...
 
-Commands/tests run:
+Commands/checks run:
 - ...
 
-Results:
+Evidence/results:
 - ...
 
 Remaining issues:
@@ -627,59 +362,21 @@ Git:
 STOP: waiting for user approval before the next stage.
 ```
 
-If the stage is blocked because the user must do something, do **not** create a completion commit or claim success. Ask for the action, wait, then finish the same stage in the same chat if practical.
-
-# Later Research Phases — Not Part of the Initial Build
-
-Only after the pilot is stable should the project expand toward the formal MSc research design.
-
-Possible later work includes:
-
-- adding real public Flutter/GitHub minimal reproductions;
-- selecting and freezing the main evaluation model;
-- adding independent reproduction predicates;
-- repeating runs for non-determinism;
-- adding capability-ablation configurations;
-- comparing selected models using the same runner/tools;
-- measuring false positives/false negatives in agent self-assessment;
-- regression-status evaluation on current project versions.
-
-These later phases should preserve the proposal's requirement that model/tool versions, prompt, sampling settings, and step budget are fixed and recorded during formal evaluation.
+If a stage is blocked by required user action, do not create a completion commit or claim success. Report the exact blocker and remain in the same stage.
 
 ---
 
-# Operating Rules for Claude/Codex
+# Operating Rules for Codex
 
-When executing this plan:
-
-1. **Read `README.md` first.**
-2. Work on **one stage only in the current chat/session**.
-3. Follow stages in order.
-4. Never start, scaffold, or pre-implement the next stage.
-5. Do not redesign the repository unless the current stage proves the design insufficient.
-6. Do not introduce frameworks or folders that are not needed yet.
-7. Prefer existing Flutter/Dart MCP capabilities over custom Flutter automation code.
-8. Use PydanticAI rather than creating a custom agent loop.
-9. Keep model configuration separate from capabilities.
-10. Keep only one `FULL` capability set during the pilot.
-11. Keep only one local model during the initial implementation.
-12. Never continue to the next stage without completing and testing the current stage.
-13. If user action is required, **stop immediately** and give exact step-by-step instructions; continue only after the user confirms completion.
-14. Use local Git throughout the project. Keep commits meaningful and history readable. At minimum, create a commit for every completed stage.
-15. Do not automatically squash, rewrite, or clean history.
-16. Before declaring a stage complete, verify the working tree is clean with `git status`.
-17. At the end of every stage, report:
-    - stage completed;
-    - work implemented;
-    - files created/changed;
-    - commands run;
-    - tests/runs performed;
-    - test results;
-    - unresolved problems, if any;
-    - user action required, if any;
-    - `git status`;
-    - final commit hash;
-    - recent Git history (`git log --oneline` for the latest relevant commits).
-18. Then **stop and wait for explicit user approval**.
-
-The priority is not to build quickly. The priority is to build one small, observable, reproducible step at a time, with a clean Git checkpoint after every completed stage.
+1. Read `README.md` and the current stage before acting.
+2. Work on one stage only and respect the stated scope boundaries.
+3. Preserve completed-stage decisions unless the user explicitly opens them for revision.
+4. Prefer existing Flutter/Dart MCP capabilities to new custom automation.
+5. Keep the agent-facing tool surface generic and keep low-level Flutter details private.
+6. Keep development-model work, model selection, curation, and formal evaluation separate.
+7. Treat successful command execution, a tap acknowledgement, a build, analyzer output, and a model statement as distinct from runtime reproduction evidence.
+8. Never expose curator ground truth, predicates, expected evidence, notes, patches, or solution leakage to the evaluation agent.
+9. Never discard rejected public candidates or re-inspect known material without a reason recorded in persistent state.
+10. Do not add retries, selectors, prompts, or behavior tailored to a single public case.
+11. Use local Git, preserve readable history, and verify a clean tree before completion claims.
+12. Stop for explicit user approval after every stage.
