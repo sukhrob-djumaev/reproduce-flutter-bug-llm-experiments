@@ -1,0 +1,21 @@
+Curator-only evidence (Flutter 3.47.1, emulator API 36, 2026-10-01).
+RELEASE (flutter run --release): tap 'Show dialog' -> dialog shows only the title and 'Delete'; a large grey box (RGB 195,194,195 at screen center) covers the content area. logcat: `I flutter: type '_OverflowBarParentData' is not a subtype of type 'FlexParentData' in type cast`. Fresh-process repeat (force-stop + am start of the release APK): identical grey pixel and same logcat line.
+DEBUG (flutter run --debug): dialog renders normally (title, content, Delete, Cancel, Save) but the console prints `EXCEPTION CAUGHT BY WIDGETS LIBRARY ... ParentDataWidget Expanded(flex: 1) wants to apply ParentData of type FlexParentData ...` (so the issue's 'no error in debug' is only true for the UI; the console error exists; a comment in the issue says debug already errors).
+Debug excerpt: see debug_exception_excerpt.txt below.
+══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════
+The following assertion was thrown while applying parent data.:
+Incorrect use of ParentDataWidget.
+The ParentDataWidget Expanded(flex: 1) wants to apply ParentData of type FlexParentData to a
+RenderObject, which has been set up to accept ParentData of incompatible type
+_OverflowBarParentData.
+Usually, this means that the Expanded widget has the wrong ancestor RenderObjectWidget. Typically,
+Expanded widgets are placed directly inside Flex widgets.
+The offending Expanded is currently placed inside a OverflowBar widget.
+The ownership chain for the RenderObject that received the incompatible parent data was:
+  SizedBox.shrink ← Expanded ← Spacer ← OverflowBar ← Padding ← Column ← IntrinsicWidth ← Semantics
+← DefaultTextStyle ← AnimatedDefaultTextStyle ← ⋯
+
+When the exception was thrown, this was the stack:
+#0      RenderObjectElement._updateParentData.<anonymous closure> (package:flutter/src/widgets/framework.dart:6895:11)
+#1      RenderObjectElement._updateParentData (package:flutter/src/widgets/framework.dart:6912:6)
+#2      RenderObjectElement.attachRenderObject (package:flutter/src/widgets/framework.dart:6958:7)

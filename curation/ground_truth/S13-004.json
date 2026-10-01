@@ -1,0 +1,28 @@
+{
+  "schema_version": "1",
+  "record_purpose": "formal_ground_truth_candidate_stage13_pool",
+  "case_id": "S13-004",
+  "source_repository": "https://github.com/flutter/flutter",
+  "issue_reference": "https://github.com/flutter/flutter/issues/192151",
+  "case_git_revision": "Flutter SDK 3.47.1 (Material 3 default theme; SDK version is the revision) + inline MRE; no third-party packages; do not upgrade Flutter + main.dart sha256:2f5e1405724fea69388d715d624e5d292003a8a7d634f0f3f6098736bd59c79d",
+  "issue_snapshot_path_or_hash": "NOT_FINALIZED (full issue body sha256:10a4b03386f8d0b6b69e10544db17fc7bab970e62d4c62adc92a9f4e5d6614aa)",
+  "flutter_version": "3.47.1",
+  "dart_version": "3.13.1",
+  "platform": "android-emulator-api-36 (AVD Medium_Phone_API_36-ext19)",
+  "setup_instructions": "See curation/accepted/structural_rendering_fault/S13-004/provenance_and_curation_notes.md. Reset: `adb shell am force-stop com.example.c013; adb shell am start -n com.example.c013/.MainActivity`; picker closes with the process. Verified once (needs a retry tap if rendering is slow).",
+  "reproduction_predicate": {
+    "description": "With the date picker open on a 1080x2400, 420 dpi (411 dp wide) phone display, the rendered width of an individual day button in the calendar grid is less than 48 dp (about 43-44 dp).",
+    "evaluation_method": "Independent scorer measures the day-button width (widget/semantics bounds via inspector, or debug-paint outlines) and compares with 48 dp."
+  },
+  "expected_observable_evidence": [
+    "With the date picker open on a 1080x2400, 420 dpi (411 dp wide) phone display, the rendered width of an individual day button in the calendar grid is less than 48 dp (about 43-44 dp)."
+  ],
+  "defect_class": "structural_rendering_fault",
+  "subtype": "touch_target_too_small",
+  "manual_verification": {
+    "verified": true,
+    "verification_date": "2026-10-01",
+    "verifier_id": "stage13-curator",
+    "notes": "Single curator; reset verified as described; not second-reviewed. Accepted into pool only."
+  }
+}

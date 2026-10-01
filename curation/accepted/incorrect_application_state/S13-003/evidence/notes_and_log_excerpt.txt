@@ -1,0 +1,6 @@
+Curator-only evidence (Flutter 3.47.1, go_router 17.5.0, emulator API 36, targetSdk = flutter.targetSdkVersion, 2026-10-01).
+Sequence: tap 'settings' tab, tap SETTINGS (sub-route /settings/general shows 'GENERAL'), tap 'home' tab (HOME shown), press system Back (adb keyevent 4).
+Run 1: after Back 1/2/3: topResumedActivity = com.example.c012/.MainActivity (app still foreground, HOME unchanged).
+Fresh process repeat: after Back 1 and Back 2: still com.example.c012/.MainActivity.
+CONTROL (fresh process, no sub-route pushed): Back 1 -> foreground activity changed to the launcher/previous app (app closed).
+Note: evidence is the Android foreground-activity state (adb dumpsys activity) plus unchanged HOME screen; it is not visible inside the Flutter UI.

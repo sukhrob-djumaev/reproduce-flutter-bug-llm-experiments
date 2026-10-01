@@ -1,0 +1,5 @@
+Curator-only evidence (Flutter 3.47.1, Material 3, emulator API 36, 1080x2400 @ 420dpi = 2.625 px/dp, 2026-10-01).
+Debug-paint screenshot row scan (y=1219 px) of the open showDatePicker: day-button outlines span x=104..219 px (width ~115-116 px = ~44 dp incl. outline) with next tile starting x=230 (pitch 126 px = 48 dp; gap ~11 px).
+=> visible day button width ~43-44 dp (issue says ~43dp), below the 48 dp touch-target recommendation. Identical pixel runs in two runs (initial and after force-stop + am start).
+Caveat: first tap after relaunch was dropped while debug-paint rendering was slow (frames skipped); second tap opened the picker.
+Measurement method for scorer: widget bounds of the day-button InkResponse/Semantics node (inspector), not just pixels.

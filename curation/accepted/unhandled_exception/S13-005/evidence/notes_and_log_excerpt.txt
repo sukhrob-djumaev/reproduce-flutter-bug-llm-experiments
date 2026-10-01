@@ -1,0 +1,19 @@
+Curator-only evidence. Source: flutter run -d emulator-5556 --debug stdout, Flutter 3.47.1 (SDK commit 6655482ec06e547f90abf8ae7590466f4415978d = tag 3.47.1), a11y_assessments MaterialBanner use case, 2026-10-01.
+Steps: filter batch1 only -> MaterialBanner -> Show a MaterialBanner -> AppBar back (banner persists on home) -> tap DISMISS.
+Result: banner remains visible after DISMISS; framework prints 'EXCEPTION CAUGHT BY GESTURE ... This widget has been unmounted, so the State no longer has a context'. Fresh-process repeat: same banner-remains symptom (exception text not in plain logcat without tool attached).
+
+══╡ EXCEPTION CAUGHT BY GESTURE ╞═══════════════════════════════════════════════════════════════════
+The following assertion was thrown while handling a gesture:
+This widget has been unmounted, so the State no longer has a context (and should be considered
+defunct).
+Consider canceling any active work during "dispose" or using the "mounted" getter to determine if
+the State is still active.
+
+When the exception was thrown, this was the stack:
+#0      State.context.<anonymous closure> (package:flutter/src/widgets/framework.dart:952:9)
+#1      State.context (package:flutter/src/widgets/framework.dart:958:6)
+#2      MainWidgetState.hideBanner (package:a11y_assessments/use_cases/material_banner.dart:46:26)
+#3      _InkResponseState.handleTap (package:flutter/src/material/ink_well.dart:1224:21)
+#4      GestureRecognizer.invokeCallback (package:flutter/src/gestures/recognizer.dart:362:24)
+#5      TapGestureRecognizer.handleTapUp (package:flutter/src/gestures/tap.dart:758:11)
+#6      BaseTapGestureRecognizer._checkUp (package:flutter/src/gestures/tap.dart:383:5)

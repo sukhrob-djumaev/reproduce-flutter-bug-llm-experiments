@@ -1,0 +1,1 @@
+Sample label text during curation: Focused: r0c0 -> (Down) r1c0 -> (Up) r0c1. Reported on web/3.44; reproduced on Android API 36 with adb key events on 3.47.1.

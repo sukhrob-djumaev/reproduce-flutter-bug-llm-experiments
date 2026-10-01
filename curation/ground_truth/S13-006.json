@@ -1,0 +1,28 @@
+{
+  "schema_version": "1",
+  "record_purpose": "formal_ground_truth_candidate_stage13_pool",
+  "case_id": "S13-006",
+  "source_repository": "https://github.com/flutter/flutter",
+  "issue_reference": "https://github.com/flutter/flutter/issues/188272",
+  "case_git_revision": "Flutter SDK 3.47.1 (SDK version is the revision) + inline MRE; no third-party packages; MUST be run as a RELEASE build (`flutter run --release`) to show the defect + main.dart sha256:c667c8de1835860703eb3728c291c3ba089dc0fc2455a4b96ecb08edfd77e64d",
+  "issue_snapshot_path_or_hash": "NOT_FINALIZED (full issue body sha256:4830cf5b680e212b6c1edb0696cb6c96d27a040b747e5c9ab1ce11925a8eb97f)",
+  "flutter_version": "3.47.1",
+  "dart_version": "3.13.1",
+  "platform": "android-emulator-api-36 (AVD Medium_Phone_API_36-ext19)",
+  "setup_instructions": "See curation/accepted/structural_rendering_fault/S13-006/provenance_and_curation_notes.md. Reset: `adb shell am force-stop com.example.c016; adb shell am start -n com.example.c016/.MainActivity` on the installed RELEASE build (no persisted state). Verified.",
+  "reproduction_predicate": {
+    "description": "In a release build, tapping 'Show dialog' displays the AlertDialog without its content text and without the Cancel/Save buttons, with a large grey region in place of the content, while in a debug build the same dialog shows 'Dialog content', 'Cancel' and 'Save'.",
+    "evaluation_method": "Independent scorer checks (release build) that texts 'Dialog content', 'Cancel' and 'Save' are not visible after the tap (screenshot/visible text), supportive: logcat line '_OverflowBarParentData is not a subtype of type FlexParentData'."
+  },
+  "expected_observable_evidence": [
+    "In a release build, tapping 'Show dialog' displays the AlertDialog without its content text and without the Cancel/Save buttons, with a large grey region in place of the content, while in a debug build the same dialog shows 'Dialog content', 'Cancel' and 'Save'."
+  ],
+  "defect_class": "structural_rendering_fault",
+  "subtype": "release_only_missing_dialog_content",
+  "manual_verification": {
+    "verified": true,
+    "verification_date": "2026-10-01",
+    "verifier_id": "stage13-curator",
+    "notes": "Single curator; reset verified as described; not second-reviewed. Accepted into pool only."
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "1",
+  "record_purpose": "formal_ground_truth_candidate_stage13_pool",
+  "case_id": "S13-001",
+  "source_repository": "https://github.com/flutter/flutter",
+  "issue_reference": "https://github.com/flutter/flutter/issues/190653",
+  "case_git_revision": "Flutter SDK 3.47.1 (framework regression; SDK version is the revision) + inline MRE; no third-party packages; do not upgrade Flutter (fix PR pending) + main.dart sha256:b65a7ff67c472fab8c7385f434166256b748b5adc6e2e3d6688ecc4bccce423d",
+  "issue_snapshot_path_or_hash": "NOT_FINALIZED (full issue body sha256:b5557193cd56c09eb155d6adc4a157f6b7cff322583ac0c69e6c3187e2e46472)",
+  "flutter_version": "3.47.1",
+  "dart_version": "3.13.1",
+  "platform": "android-emulator-api-36 (AVD Medium_Phone_API_36-ext19)",
+  "setup_instructions": "See curation/accepted/incorrect_application_state/S13-001/provenance_and_curation_notes.md. Reset: `adb shell am force-stop com.example.c010; adb shell am start -n com.example.c010/.MainActivity` (no persisted state). Verified once.",
+  "reproduction_predicate": {
+    "description": "After app start (label `Focused: r0c0`), one Down key press then one Up key press results in the on-screen label `Focused: r0c1` rather than `Focused: r0c0`.",
+    "evaluation_method": "Independent scorer reads the visible `Focused:` label text after the key sequence."
+  },
+  "expected_observable_evidence": [
+    "After app start (label `Focused: r0c0`), one Down key press then one Up key press results in the on-screen label `Focused: r0c1` rather than `Focused: r0c0`."
+  ],
+  "defect_class": "incorrect_application_state",
+  "subtype": "focus_traversal_wrong_target",
+  "manual_verification": {
+    "verified": true,
+    "verification_date": "2026-10-01",
+    "verifier_id": "stage13-curator",
+    "notes": "Single curator; reset verified as described; not second-reviewed. Accepted into pool only."
+  }
+}

@@ -1,0 +1,6 @@
+Curator-only evidence (Flutter 3.47.1, two_dimensional_scrollables 0.5.2, emulator API 36, 2026-10-01).
+flutter run log after tapping the visible three-dot button of rows 2 and 4 at initial horizontal scroll (no popup opened, no 'popup opened' line):
+  I/flutter: row tapped: 2
+  I/flutter: row tapped: 4
+After force-stop + am start (fresh process, logcat): tap on same button -> 'row tapped: 2', no 'popup opened'.
+Control (issue steps 7-9: scroll fully right then tap): NOT verified; 5 horizontal swipes did not reach the right edge and the tap again logged 'row tapped: 2'. Not needed for the predicate.
