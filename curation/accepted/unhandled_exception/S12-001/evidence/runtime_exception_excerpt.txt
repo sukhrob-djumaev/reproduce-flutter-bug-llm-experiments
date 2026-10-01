@@ -1,0 +1,74 @@
+Curator-only evidence. Source: flutter run -d emulator-5556 --debug stdout, Flutter 3.47.1, 2026-10-01.
+
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during performLayout():
+SliverCrossAxisGroup ran out of extent before child could be laid out.
+SliverCrossAxisGroup lays out any slivers with a constrained cross axis before laying out those
+which expand. In this case, cross axis extent was used up before the next sliver could be laid out.
+Make sure that the total amount of extent allocated by constrained child slivers does not exceed the
+cross axis extent that is available for the SliverCrossAxisGroup.
+
+The relevant error-causing widget was:
+  SliverCrossAxisGroup
+  SliverCrossAxisGroup:file:///private/tmp/claude-501/-Users-sukhrob-Development-Repos-mix-project/2f904b34-88d8-463b-afde-51b47afb36c7/scratchpad/work/cand004/lib/main.dart:16:13
+
+When the exception was thrown, this was the stack:
+#0      _assertOutOfExtent (package:flutter/src/rendering/sliver_group.dart:179:5)
+#1      RenderSliverCrossAxisGroup.performLayout (package:flutter/src/rendering/sliver_group.dart:70:16)
+#2      RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#3      RenderViewportBase.layoutChildSequence (package:flutter/src/rendering/viewport.dart:821:13)
+#4      RenderViewport._attemptLayout (package:flutter/src/rendering/viewport.dart:1831:12)
+#5      RenderViewport.performLayout (package:flutter/src/rendering/viewport.dart:1724:20)
+#6      RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#7      RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#8      RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#9      RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#10     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#11     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#12     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#13     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#14     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#15     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#16     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#17     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#18     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#19     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#20     RenderCustomPaint.performLayout (package:flutter/src/rendering/custom_paint.dart:574:11)
+#21     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#22     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#23     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#24     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#25     _RenderCustomClip.performLayout (package:flutter/src/rendering/proxy_box.dart:1549:11)
+#26     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#27     RenderConstrainedBox.performLayout (package:flutter/src/rendering/proxy_box.dart:296:14)
+#28     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#29     MultiChildLayoutDelegate.layoutChild (package:flutter/src/rendering/custom_layout.dart:180:12)
+#30     _ScaffoldLayout.performLayout (package:flutter/src/material/scaffold.dart:1113:7)
+#31     MultiChildLayoutDelegate._callPerformLayout (package:flutter/src/rendering/custom_layout.dart:246:7)
+#32     RenderCustomMultiChildLayoutBox.performLayout (package:flutter/src/rendering/custom_layout.dart:417:14)
+#33     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#34     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#35     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#36     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#37     _RenderCustomClip.performLayout (package:flutter/src/rendering/proxy_box.dart:1549:11)
+#38     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#39     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#40     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#41     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#42     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#43     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#44     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#45     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#46     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#47     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#48     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#49     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#50     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#51     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#52     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#53     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#54     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#55     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)
+#56     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)
+#57     RenderProxyBoxMixi
+[... truncated ...]

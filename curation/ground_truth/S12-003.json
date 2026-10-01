@@ -1,0 +1,29 @@
+{
+  "schema_version": "1",
+  "record_purpose": "formal_ground_truth_candidate_stage12_experiment",
+  "case_id": "S12-003",
+  "source_repository": "https://github.com/flutter/flutter",
+  "issue_reference": "https://github.com/flutter/flutter/issues/192861",
+  "case_git_revision": "flutter-sdk 3.47.1 (framework 6655482ec0) + inline MRE main.dart sha256:10be7870df8a2d6d0398ecc9baf522919863eb75a9be72ca9c7cc55d297dc6a4",
+  "issue_snapshot_path_or_hash": "NOT_FINALIZED (full issue body sha256:e0d9d8bcc968f92ba82f9631da60bb70fb33aeb6ed5d2e23ebb8d7e0db9b340b)",
+  "flutter_version": "3.47.1",
+  "dart_version": "3.13.1",
+  "platform": "android-emulator-api-36 (AVD Medium_Phone_API_36-ext19)",
+  "setup_instructions": "See curation/accepted/unhandled_exception/S12-003/provenance_and_curation_notes.md. Scaffold, copy source/lib/main.dart, run debug, tap the DropdownMenu. Reset: force-stop + am start.",
+  "reproduction_predicate": {
+    "description": "After tapping the DropdownMenu once, a rendering assertion containing 'sizeAccessAllowed' / 'RenderBox.size accessed beyond the scope of resize' is recorded and no menu entries (Item 1-3) become visible.",
+    "evaluation_method": "Independent scorer checks the retained runtime-error observation (status observed) for the message; supportive check that Item 1-3 texts are absent after the tap."
+  },
+  "expected_observable_evidence": [
+    "Runtime error entry containing 'sizeAccessAllowed'",
+    "No visible 'Item 1','Item 2','Item 3' after the tap"
+  ],
+  "defect_class": "unhandled_exception",
+  "subtype": "layout_assertion_after_tap",
+  "manual_verification": {
+    "verified": true,
+    "verification_date": "2026-10-01",
+    "verifier_id": "stage12-curator",
+    "notes": "Reproduced on attached flutter run; reset relaunch reproduced the same visible symptom (exception text only with tool attached). Single curator; no second review. Stage 12 experiment acceptance only."
+  }
+}

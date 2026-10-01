@@ -1,0 +1,1 @@
+Curator source for S12-001. Rebuild: `flutter create --project-name cand004 -e --platforms=android cand004`, copy `lib/main.dart`, `pubspec.yaml`, `pubspec.lock` over the scaffold, `flutter pub get --enforce-lockfile`, run on Android emulator with Flutter 3.47.1.

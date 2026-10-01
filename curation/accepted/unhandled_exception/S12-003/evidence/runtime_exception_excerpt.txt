@@ -1,0 +1,20 @@
+Curator-only evidence. Source: flutter run -d emulator-5556 --debug stdout after tapping the DropdownMenu, Flutter 3.47.1, 2026-10-01. Zero occurrences of 'sizeAccessAllowed' in the log before the tap.
+
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during performLayout():
+RenderBox.size accessed beyond the scope of resize, layout, or permitted parent access. RenderBox
+can always access its own size, otherwise, the only object that is allowed to read RenderBox.size is
+its parent, if they have said they will. If you hit this assert trying to access a child's size,
+pass "parentUsesSize: true" to that child's layout() in _RenderTheater.performLayout.
+'package:flutter/src/rendering/box.dart':
+Failed assertion: line 2268 pos 11: 'sizeAccessAllowed'
+
+Either the assertion indicates an error in the framework itself, or we should provide substantially
+more information in this error message to help you determine and fix the underlying cause.
+In either case, please report this assertion by filing a bug on GitHub:
+  https://github.com/flutter/flutter/issues/new?template=02_bug.yml
+
+The relevant error-causing widget was:
+  DropdownMenu<int>
+  DropdownMenu:file:///private/tmp/claude-501/-Users-sukhrob-Development-Repos-mix-project/2f904b34-88d8-463b-afde-51b47afb36c7/scratchpad/work/cand008/lib/main.dart:34:14
+[... truncated ...]

@@ -1,0 +1,19 @@
+Curator-only evidence. Source: flutter run -d emulator-5556 --debug output at launch, Flutter 3.47.1, go_router 17.3.0, 2026-10-01. Also reproduced after force-stop+am start (adb logcat matched 'configuration.isNotEmpty').
+
+D/FlutterRenderer(11787): Width is zero. 0,0
+Syncing files to device sdk gphone64 arm64...                   
+E/flutter (11787): [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: 'package:go_router/src/delegate.dart': Failed assertion: line 228 pos 12: 'configuration.isNotEmpty || configuration.isError': is not true.
+E/flutter (11787): #0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:67:4)
+E/flutter (11787): #1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:49:5)
+E/flutter (11787): #2      GoRouterDelegate.setNewRoutePath (package:go_router/src/delegate.dart:228:12)
+E/flutter (11787): #3      RouterDelegate.setInitialRoutePath (package:flutter/src/widgets/router.dart:1358:12)
+E/flutter (11787): #4      _RouterState._processParsedRouteInformation.<anonymous closure> (package:flutter/src/widgets/router.dart:790:34)
+E/flutter (11787): #5      Future._propagateToListeners.handleValueCallback (dart:async/future_impl.dart:948:45)
+E/flutter (11787): #6      Future._propagateToListeners (dart:async/future_impl.dart:977:13)
+E/flutter (11787): #7      Future._addListener.<anonymous closure> (dart:async/future_impl.dart:543:9)
+E/flutter (11787): #8      _microtaskLoop (dart:async/schedule_microtask.dart:40:35)
+E/flutter (11787): #9      _startMicrotaskLoop (dart:async/schedule_microtask.dart:49:5)
+E/flutter (11787): 
+Syncing files to device sdk gphone64 arm64...                      675ms
+
+[... truncated ...]

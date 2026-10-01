@@ -1,0 +1,15 @@
+Curator-only evidence. adb logcat of the reproduction run, Flutter 3.47.1, emulator-5556 API 36, 2026-10-01 (fresh process after force-stop+am start; steps: push A twice, tab C push once, tab B, two left-edge swipes, tab A).
+10-01 15:30:38.964 11362 11362 I flutter : /A didPush /A1
+10-01 15:30:44.669 11362 11362 I flutter : /A didPush /A2
+10-01 15:30:46.793 11362 11362 I flutter : /A didPush /A3
+10-01 15:30:48.908 11362 11362 I flutter : /C didPush /C1
+10-01 15:30:50.996 11362 11362 I flutter : /C didPush /C2
+10-01 15:30:53.137 11362 11362 I flutter : /B didPush /B1
+10-01 15:30:55.661 11362 11362 I flutter : Stack A - 3 onPopInvokedWithResult didPop=true
+10-01 15:30:55.667 11362 11362 I flutter : /A didPop /A3 -> /A2
+10-01 15:30:55.691 11362 11362 I flutter : Stack C - 2 onPopInvokedWithResult didPop=true
+10-01 15:30:55.691 11362 11362 I flutter : /C didPop /C2 -> /C1
+10-01 15:30:59.932 11362 11362 I flutter : Stack A - 2 onPopInvokedWithResult didPop=true
+10-01 15:30:59.934 11362 11362 I flutter : /A didPop /A2 -> /A1
+10-01 15:31:03.833 11362 11362 I flutter : Stack A - 3 dispose
+10-01 15:31:03.834 11362 11362 I flutter : Stack A - 2 dispose

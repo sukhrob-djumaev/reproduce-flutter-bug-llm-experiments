@@ -1,0 +1,29 @@
+{
+  "schema_version": "1",
+  "record_purpose": "formal_ground_truth_candidate_stage12_experiment",
+  "case_id": "S12-001",
+  "source_repository": "https://github.com/flutter/flutter",
+  "issue_reference": "https://github.com/flutter/flutter/issues/191275",
+  "case_git_revision": "flutter-sdk 3.47.1 (framework 6655482ec0) + inline MRE main.dart sha256:cab3dd56417c8db2555a14221d175d93a9e6abedc2d83643d59ddec7b83a5d83",
+  "issue_snapshot_path_or_hash": "NOT_FINALIZED (full issue body sha256:77abdd0eed77a48f96b74cabc404cc2ab68e94a216ef7503bace0180ef13abfe)",
+  "flutter_version": "3.47.1",
+  "dart_version": "3.13.1",
+  "platform": "android-emulator-api-36 (AVD Medium_Phone_API_36-ext19)",
+  "setup_instructions": "See curation/accepted/unhandled_exception/S12-001/provenance_and_curation_notes.md. Scaffold android project, copy source/lib/main.dart, run debug. Reset: force-stop + am start.",
+  "reproduction_predicate": {
+    "description": "After app launch with no further action, the runtime records a rendering assertion with message containing 'SliverCrossAxisGroup ran out of extent before child could be laid out', and the body shows none of 'Expanded (Left)', 'Expanded (Right)', 'Center item 1'.",
+    "evaluation_method": "Independent scorer checks the retained runtime-error observation (status observed) for the message; supportive check of visible texts."
+  },
+  "expected_observable_evidence": [
+    "Runtime error entry containing 'SliverCrossAxisGroup ran out of extent before child could be laid out'",
+    "Visible text lacking list/column content (app bar title 'Centered SliverConstrainedCrossAxis' only)"
+  ],
+  "defect_class": "unhandled_exception",
+  "subtype": "layout_assertion_on_launch",
+  "manual_verification": {
+    "verified": true,
+    "verification_date": "2026-10-01",
+    "verifier_id": "stage12-curator",
+    "notes": "Reproduced once on attached flutter run; reset relaunch showed identical blank body (exception text not visible in bare logcat). Single curator; second-curator review not done. Stage 12 experiment acceptance only."
+  }
+}
