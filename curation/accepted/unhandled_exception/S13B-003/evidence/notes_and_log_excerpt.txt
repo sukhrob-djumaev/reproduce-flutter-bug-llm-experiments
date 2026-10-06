@@ -1,0 +1,16 @@
+Curator-only evidence. Source: flutter run --debug stdout, Flutter 3.47.1, fl_chart 1.2.0 (reporter version), emulator API 36, 2026-10-01.
+UI: the Scaffold body is replaced by the red framework error widget showing 'LateInitializationError: Field 'mostRightSpot' has not been initialized.' (no chart drawn). Repeated in a fresh process (second launch attempt after force-stop raced with the launcher; the next am start showed the same red widget).
+
+══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════
+The following LateError was thrown building KeyedSubtree-[GlobalKey#87ecd]:
+LateInitializationError: Field 'mostRightSpot' has not been initialized.
+
+The relevant error-causing widget was:
+  Scaffold
+  Scaffold:file:///private/tmp/claude-501/-Users-sukhrob-Development-Repos-mix-project/2f904b34-88d8-463b-afde-51b47afb36c7/scratchpad/work/f021/lib/main.dart:14:13
+
+When the exception was thrown, this was the stack:
+#0      LineChartBarData.mostRightSpot (package:fl_chart/src/chart/line_chart/line_chart_data.dart)
+#1      LineChartHelper.calculateMaxAxisValues (package:fl_chart/src/chart/line_chart/line_chart_helper.dart:42:19)
+#2      _LineChartState._getData (package:fl_chart/src/chart/line_chart/line_chart.dart:103:57)
+#3      _LineChartState.forEachTween (package:fl_chart/src/chart/line_chart/line_chart.dart:166:7)

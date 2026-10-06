@@ -16,3 +16,9 @@ This directory is not an agent input or result surface. The running agent receiv
 - Pool is now 10 accepted cases (S12-001..004, S13-001..006); see `stage13_pool_summary.md` for the combined funnel, class/type distribution, capability requirements, and indicative suitability. No calibration/formal split has been made.
 - `candidates.csv` / `search_state.csv` line endings were normalized to LF in Stage 13 (content of all earlier rows unchanged).
 - Case IDs: `S12-*` from Stage 12, `S13-*` from Stage 13; candidate IDs `CAND-001..016`.
+
+## Stage 13B (2026-10-02)
+
+- Diversity-gap curation added 3 cases from independent package repos: S13B-001 (list_smith), S13B-002 (fluent_ui), S13B-003 (fl_chart). Pool is now 13 accepted of 21 attempted (CAND-001..021).
+- `stage13b_pool_summary.md` supersedes `stage13_pool_summary.md` for the combined funnel, distributions, capability table, and indicative suitability. No calibration/formal split has been made.
+- Silent_error_condition remains at 0 accepted (CAND-017 and CAND-019 were blocked and are recorded).

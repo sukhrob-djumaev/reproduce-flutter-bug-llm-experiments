@@ -1,0 +1,28 @@
+{
+  "schema_version": "1",
+  "record_purpose": "formal_ground_truth_candidate_stage13_pool",
+  "case_id": "S13B-001",
+  "source_repository": "https://github.com/LahaLuhem/list_smith",
+  "issue_reference": "https://github.com/LahaLuhem/list_smith/issues/80",
+  "case_git_revision": "Flutter 3.47.1 + list_smith 1.0.0 (+ infinite_scroll_pagination 5.1.1 per source/pubspec.lock) + inline MRE; maintainer plans a fix in the next major release - keep list_smith pinned at 1.0.0 + main.dart sha256:aafe850c371bcbc39afeec2cc2e8c6372932ed7232917711eeb8e13c4dc7fb61",
+  "issue_snapshot_path_or_hash": "NOT_FINALIZED (full issue body sha256:afa3c3f64649383a60ccdc94f104d7a6538757f8d4a630bd7be73d435ce5acad)",
+  "flutter_version": "3.47.1",
+  "dart_version": "3.13.1",
+  "platform": "android-emulator-api-36 (AVD Medium_Phone_API_36-ext19)",
+  "setup_instructions": "See curation/accepted/incorrect_application_state/S13B-001/provenance_and_curation_notes.md. Reset: `adb shell am force-stop com.example.d018; adb shell am start -n com.example.d018/.MainActivity`; no persisted state. Verified (every run is a fresh process).",
+  "reproduction_predicate": {
+    "description": "While the list's first page is still loading (centred loading spinner visible), a downward pull gesture at the top of the list shows the pull-to-refresh indicator (second spinner at the top) instead of being ignored.",
+    "evaluation_method": "Independent scorer inspects a screenshot/widget tree captured during the pull while the first-page loading spinner is still present: both the loading spinner and the refresh indicator are present. Outside the loading window the predicate is not evaluable."
+  },
+  "expected_observable_evidence": [
+    "While the list's first page is still loading (centred loading spinner visible), a downward pull gesture at the top of the list shows the pull-to-refresh indicator (second spinner at the top) instead of being ignored."
+  ],
+  "defect_class": "incorrect_application_state",
+  "subtype": "gesture_allowed_during_loading",
+  "manual_verification": {
+    "verified": true,
+    "verification_date": "2026-10-01",
+    "verifier_id": "stage13-curator",
+    "notes": "Single curator; reset verified as described; not second-reviewed. Accepted into pool only."
+  }
+}

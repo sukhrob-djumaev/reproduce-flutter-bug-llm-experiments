@@ -1,0 +1,6 @@
+Curator-only evidence (Flutter 3.47.1, list_smith 1.0.0, emulator API 36, 2026-10-01).
+Method: launch fresh process; poll screenshots until the first-page loading spinner (centre) is visible; immediately start a touch drag downward with `adb shell input motionevent DOWN/MOVE` (540,600 -> 540,1400) and capture while holding.
+Run 2 and Run 3 (fresh processes): TWO spinners visible simultaneously - the pull-to-refresh indicator at the top and the first-page loading spinner at screen centre (images ptr_during_loading_run2/3.png).
+Run 1: the first page had already loaded when the drag started (list of Placeholder tiles with refresh indicator) - legitimate refresh, outside the loading window; shows the timing sensitivity.
+Expected (per issue): no pull-to-refresh while the initial list is still loading.
+Caveat: the sample logs nothing, so a re-fetch is inferred from the visible refresh indicator, not from a fetch counter.

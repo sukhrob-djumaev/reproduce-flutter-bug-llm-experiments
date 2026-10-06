@@ -1,0 +1,4 @@
+Curator-only evidence (Flutter 3.47.1, fluent_ui 4.16.1, emulator API 36, 2026-10-01).
+Run 1 (flutter run): counter button tapped twice -> `counter: 2`; tapping `rebuild parent` -> label `rebuild parent: 1` and `counter: 0` (state of the tab body lost).
+Run 2 (fresh process, force-stop + am start): before: `rebuild parent: 0`, `counter: 2`; after one tap on `rebuild parent`: `rebuild parent: 1`, `counter: 0`.
+Not controlled: a 4.16.0 baseline run (the issue reports the counter survives on 4.16.0).

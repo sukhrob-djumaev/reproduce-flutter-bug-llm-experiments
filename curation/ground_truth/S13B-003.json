@@ -1,0 +1,28 @@
+{
+  "schema_version": "1",
+  "record_purpose": "formal_ground_truth_candidate_stage13_pool",
+  "case_id": "S13B-003",
+  "source_repository": "https://github.com/imaNNeo/fl_chart",
+  "issue_reference": "https://github.com/imaNNeo/fl_chart/issues/2115",
+  "case_git_revision": "Flutter 3.47.1 + fl_chart 1.2.0 (reporter version; lockfile in source/) + inline MRE; a fix PR (#2119) exists, so keep fl_chart pinned at 1.2.0 + main.dart sha256:2054a97f12c85ee1dac0f0c72093cd0f2724cab6ab108dd8adc66f22fd5e8929",
+  "issue_snapshot_path_or_hash": "NOT_FINALIZED (full issue body sha256:6b479850a2760ceb2fd8948e00387441ef6a96a98686f844b2df4c7ee506d35c)",
+  "flutter_version": "3.47.1",
+  "dart_version": "3.13.1",
+  "platform": "android-emulator-api-36 (AVD Medium_Phone_API_36-ext19)",
+  "setup_instructions": "See curation/accepted/unhandled_exception/S13B-003/provenance_and_curation_notes.md. Reset: `adb shell am force-stop com.example.f021; adb shell am start -n com.example.f021/.MainActivity` (wait a few seconds; one immediate relaunch after force-stop landed on the launcher). No persisted state. Verified.",
+  "reproduction_predicate": {
+    "description": "On launch with no interaction, the screen body shows the framework error widget text `LateInitializationError: Field 'mostRightSpot' has not been initialized.` instead of a rendered chart, and the runtime records that exception.",
+    "evaluation_method": "Independent scorer checks the retained runtime-error observation (or the visible error-widget text) for `LateInitializationError ... mostRightSpot`; in a debug build the same text is visible in the widget tree."
+  },
+  "expected_observable_evidence": [
+    "On launch with no interaction, the screen body shows the framework error widget text `LateInitializationError: Field 'mostRightSpot' has not been initialized.` instead of a rendered chart, and the runtime records that exception."
+  ],
+  "defect_class": "unhandled_exception",
+  "subtype": "late_init_error_on_build",
+  "manual_verification": {
+    "verified": true,
+    "verification_date": "2026-10-01",
+    "verifier_id": "stage13-curator",
+    "notes": "Single curator; reset verified as described; not second-reviewed. Accepted into pool only."
+  }
+}
