@@ -1,14 +1,14 @@
 # Current operational state
 
-Updated: 2026-10-11. Operational state only; the formal protocol and `plan.md` govern.
+Updated: 2026-10-11 (Stage 14 approved). Operational state only; the formal protocol and `plan.md` govern.
 
 - **Current research stage:** Stage 14 — Model-Selection Pre-Study (next stage).
-- **Stage status:** NOT STARTED / BLOCKED on explicit start approval. Stage 13B is the last completed curation batch; there is no active approved research execution.
-- **Current objective:** Await the Stage 14 start decision; the documentation-only continuation workflow is complete. Preserve the Stage 13B → Stage 14 boundary.
+- **Stage status:** ACTIVE — setup phase. Approved by user on 2026-10-11 ("Yes, lets continue according to the plan" in reply to the Stage 14 start prompt). Entry checkpoint `fd4a921ead41ff8f6dbb7fcf19faab794a83131f` on `main`, clean tree. Protocol file now at `docs/stage_10_formal_evaluation_protocol.md`.
+- **Current objective:** Record predefined candidate models (2–4), 6–8 calibration cases, and fixed execution config; then add public-case calibration execution support; then 3 trials per case per candidate; write selection report. Stop before formal model approval and Stage 15.
 - **Branch:** `main` at inspection; check live branch on resume.
 - **Verified research / pre-session HEAD:** `a58cf58d84ca49d2a4286c3301599bd67c2ad99e` — `stage 13b: improve curated case diversity`.
 - **Workflow checkpoint:** commit containing this state/handoff; resolve with `git log -1 --format='%H %s' -- .agent/HANDOFF.md`. Read live HEAD/status, not an assumed self-hash.
-- **Approved scope:** User request of 2026-10-11 authorizes the small Markdown workflow, status reconciliation, verification, and local commits only. It explicitly forbids starting the next research stage, model-selection trials, formal evaluation, or pushing.
+- **Approved scope:** Stage 14 per `plan.md` / protocol §9 only. No new curation, per-model tuning, unrelated capabilities, formal RQ1/RQ2 trials, push, or downloads/paid APIs without asking.
 
 ## Completed evidence
 
@@ -31,3 +31,8 @@ Updated: 2026-10-11. Operational state only; the formal protocol and `plan.md` g
 ## Prohibited next actions
 
 No automatic Stage 14 start, trials, new curation, agent/prompt/tool changes, capability implementation, dataset freeze, formal RQ1/RQ2 runs, model downloads/provider spending, or push as part of this workflow task. Curator content and workflow/development context must remain outside evaluation-agent inputs and results.
+
+## Stage 14 local facts (2026-10-11)
+
+- LM Studio server not running at 127.0.0.1:1234. Locally downloaded models: Qwen2.5-7B-Instruct Q4_K_M, Qwen3.5-9B (lmstudio-community), Qwen3.5-9B Claude-Opus-reasoning-distilled (Jackrong). No cloud API keys in env.
+- Pending user decisions: final candidate set (2–4), calibration membership (6–8 of the 7 indicative: S12-001, S12-003, S12-004, S13-002, S13-005, S13B-002, S13B-003).
