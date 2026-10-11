@@ -16,7 +16,7 @@ For every stage:
 
 If a stage requires manual action or an unavailable prerequisite, stop and request the exact action. Do not guess around it, replace it with unverified evidence, or continue into a later stage.
 
-The formal protocol in `stage_10_formal_evaluation_protocol.md` governs research design; this plan governs execution stages. [AGENTS.md](AGENTS.md) supplies the shared Claude Code/Codex session workflow. `.agent/CURRENT.md` and `.agent/HANDOFF.md` record operational scope and evidence only; neither can grant a later stage or override this plan. `continue` resumes an approved stage, while an explicit instruction such as `Start Stage 14 according to plan.md` opens the next one.
+The formal protocol in `docs/stage_10_formal_evaluation_protocol.md` governs research design; this plan governs execution stages. [AGENTS.md](AGENTS.md) supplies the shared Claude Code/Codex session workflow. `.agent/CURRENT.md` and `.agent/HANDOFF.md` record operational scope and evidence only; neither can grant a later stage or override this plan. `continue` resumes an approved stage, while an explicit instruction such as `Start Stage 14 according to plan.md` opens the next one.
 
 **Status reconciled 2026-10-11:** Git and `curation/` record completed bounded curation batches in Stages 12, 13, and 13B, most recently `a58cf58`. Stage 14 has not started and awaits explicit approval. The original Stage 12 instructions below are retained as history, not a new curation authorization.
 

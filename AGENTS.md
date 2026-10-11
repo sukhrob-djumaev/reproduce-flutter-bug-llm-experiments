@@ -6,7 +6,7 @@ This contract is for the lead Claude Code/Codex **development** agent. It does n
 
 Use this order for project truth:
 
-1. `stage_10_formal_evaluation_protocol.md` — formal research protocol.
+1. `docs/stage_10_formal_evaluation_protocol.md` — formal research protocol.
 2. `plan.md` — execution stages, scope, checks, and stop conditions.
 3. `README.md` — architecture and status overview.
 4. Git — durable implementation and stage history.
