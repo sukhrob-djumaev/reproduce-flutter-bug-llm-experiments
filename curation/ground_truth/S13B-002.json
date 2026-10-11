@@ -5,7 +5,7 @@
   "source_repository": "https://github.com/bdlukaa/fluent_ui",
   "issue_reference": "https://github.com/bdlukaa/fluent_ui/issues/1349",
   "case_git_revision": "Flutter 3.47.1 + fluent_ui 4.16.1 (lockfile in source/) + inline MRE; reporter says 4.16.0 behaves correctly, so keep fluent_ui pinned at 4.16.1 + main.dart sha256:e2701d12b89da4bbe6173875b42a113a8066c65b7cf0ae8b3aee574f9f0bad98",
-  "issue_snapshot_path_or_hash": "NOT_FINALIZED (full issue body sha256:48ea45c3a7bbede78decb1bffab623af8f1f6997ed77310b1494092a02090864)",
+  "issue_snapshot_path_or_hash": "issues/case_S13B-002.md sha256:35abb0d857990ba2251932d775b6dcd08fe73e68172c1c7dfaff4fd34a5c6b31 (Stage 14 calibration snapshot; upstream body full issue body sha256:48ea45c3a7bbede78decb1bffab623af8f1f6997ed77310b1494092a02090864)",
   "flutter_version": "3.47.1",
   "dart_version": "3.13.1",
   "platform": "android-emulator-api-36 (AVD Medium_Phone_API_36-ext19)",

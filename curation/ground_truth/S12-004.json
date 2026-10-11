@@ -5,7 +5,7 @@
   "source_repository": "https://github.com/flutter/flutter (go_router package)",
   "issue_reference": "https://github.com/flutter/flutter/issues/189582",
   "case_git_revision": "flutter-sdk 3.47.1 (framework 6655482ec0) + go_router 17.3.0 + inline MRE main.dart sha256:0d782e6de4c39a43d92c8dcfe5826461684766b71ebee245baf968d77666af69",
-  "issue_snapshot_path_or_hash": "NOT_FINALIZED (full issue body sha256:a5784b73d055e6150ec2b253e9bcb5616d86766f485cf68791988851ce70cab9)",
+  "issue_snapshot_path_or_hash": "issues/case_S12-004.md sha256:c91a471461c3da738957036e6ee0e856fc8b725c39e5614e00a603291b40f24b (Stage 14 calibration snapshot; upstream body full issue body sha256:a5784b73d055e6150ec2b253e9bcb5616d86766f485cf68791988851ce70cab9)",
   "flutter_version": "3.47.1",
   "dart_version": "3.13.1",
   "platform": "android-emulator-api-36 (AVD Medium_Phone_API_36-ext19)",

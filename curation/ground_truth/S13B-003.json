@@ -5,7 +5,7 @@
   "source_repository": "https://github.com/imaNNeo/fl_chart",
   "issue_reference": "https://github.com/imaNNeo/fl_chart/issues/2115",
   "case_git_revision": "Flutter 3.47.1 + fl_chart 1.2.0 (reporter version; lockfile in source/) + inline MRE; a fix PR (#2119) exists, so keep fl_chart pinned at 1.2.0 + main.dart sha256:2054a97f12c85ee1dac0f0c72093cd0f2724cab6ab108dd8adc66f22fd5e8929",
-  "issue_snapshot_path_or_hash": "NOT_FINALIZED (full issue body sha256:6b479850a2760ceb2fd8948e00387441ef6a96a98686f844b2df4c7ee506d35c)",
+  "issue_snapshot_path_or_hash": "issues/case_S13B-003.md sha256:c44fc3fd3e2cf9849b2c5200be9fb5ed32590be42adbd653e1340567bae4a8d5 (Stage 14 calibration snapshot; upstream body full issue body sha256:6b479850a2760ceb2fd8948e00387441ef6a96a98686f844b2df4c7ee506d35c)",
   "flutter_version": "3.47.1",
   "dart_version": "3.13.1",
   "platform": "android-emulator-api-36 (AVD Medium_Phone_API_36-ext19)",

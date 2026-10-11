@@ -5,7 +5,7 @@
   "source_repository": "https://github.com/flutter/flutter",
   "issue_reference": "https://github.com/flutter/flutter/issues/192861",
   "case_git_revision": "flutter-sdk 3.47.1 (framework 6655482ec0) + inline MRE main.dart sha256:10be7870df8a2d6d0398ecc9baf522919863eb75a9be72ca9c7cc55d297dc6a4",
-  "issue_snapshot_path_or_hash": "NOT_FINALIZED (full issue body sha256:e0d9d8bcc968f92ba82f9631da60bb70fb33aeb6ed5d2e23ebb8d7e0db9b340b)",
+  "issue_snapshot_path_or_hash": "issues/case_S12-003.md sha256:a9a1a4c2d2a510a16d1b078025c0c194a2b18886ab35522e05c38e01b30ed624 (Stage 14 calibration snapshot; upstream body full issue body sha256:e0d9d8bcc968f92ba82f9631da60bb70fb33aeb6ed5d2e23ebb8d7e0db9b340b)",
   "flutter_version": "3.47.1",
   "dart_version": "3.13.1",
   "platform": "android-emulator-api-36 (AVD Medium_Phone_API_36-ext19)",
