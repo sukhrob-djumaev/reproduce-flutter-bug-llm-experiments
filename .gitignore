@@ -39,3 +39,5 @@ models/
 results/runs/*
 !results/runs/.gitkeep
 results/workspaces/
+results/prestudy/*.log
+results/prestudy/superseded_logs/

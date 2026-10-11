@@ -325,7 +325,7 @@ The committed combined pool contains 13 accepted candidates from 21 attempted (7
 
 ## Stage 14 — Model-Selection Pre-Study
 
-**Status: ACTIVE (approved 2026-10-11; entry checkpoint `fd4a921ead41ff8f6dbb7fcf19faab794a83131f`, clean tree on `main`).** Setup phase: candidate set, calibration membership, and fixed configuration are not yet recorded; no trials run.
+**Status: EXECUTED — awaiting user review and formal-model approval (approved 2026-10-11; entry checkpoint `fd4a921ead41ff8f6dbb7fcf19faab794a83131f`).** 63/63 pre-study attempts persisted; report `docs/stage_14_prestudy_report.md`. Stage 15 is not started.
 
 **Goal:** Use a bounded calibration set (approximately 6–8 suitable non-formal cases) to compare a small predefined set of candidate models under one fixed generic prompt, tools, and budget. Select the formal model by the recorded pre-study criteria, not by anecdote.
 

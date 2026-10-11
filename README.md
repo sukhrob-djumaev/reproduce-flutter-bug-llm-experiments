@@ -25,7 +25,7 @@ RQ3 is deferred. The current work prepares a defensible RQ1/RQ2 study.
 
 ## Current Status
 
-The engineering pilot, formal-design preparation, and bounded public-case curation batches through Stage 13B are complete. Stage 14 (model-selection pre-study) is next and has not started. Beginning it requires explicit user approval; a clean tree alone is not approval.
+The engineering pilot, formal-design preparation, and bounded public-case curation batches through Stage 13B are complete. Stage 14 (model-selection pre-study) has been executed (63/63 attempts; see `docs/stage_14_prestudy_report.md`) and awaits user review and formal-model approval. Stage 15 has not started and requires explicit approval.
 
 | Area | Status |
 | --- | --- |
@@ -36,7 +36,7 @@ The engineering pilot, formal-design preparation, and bounded public-case curati
 | Stage 11 readiness contracts and curation intake materials | Complete |
 | Public Flutter case curation | Stages 12/13/13B committed; 13 accepted candidates from 21 attempted |
 | Formal dataset of approximately 25 cases | Not finalized or frozen; no calibration/formal split |
-| Model-selection pre-study | Stage 14 next; not started, awaiting approval |
+| Model-selection pre-study | Stage 14 executed; awaiting review and formal-model approval |
 | Formal RQ1/RQ2 trials | Not started |
 
 The current development baseline is **PydanticAI 2.51.0** with **qwen2.5-7b-instruct** served locally through LM Studio's OpenAI-compatible endpoint. This is an engineering-development baseline, **not** the selected formal evaluation model.
@@ -190,7 +190,7 @@ Each outcome is recorded as `accepted`, `rejected`, or `deferred`, with a precis
 
 Work remains phase-gated. A session stays within one approved scope; multiple fresh sessions may resume the same stage. Completion requires its scoped work/checks and a reviewed, clean tree. Beginning the next stage separately requires explicit user approval.
 
-Open the repository root in Claude Code or Codex and type `continue` (or `continue current research stage`). [AGENTS.md](AGENTS.md) directs the lead to read the current state/handoff, relevant plan and protocol, inspect live Git and evidence, reconcile stale state, state the bounded task, and work through verification and a permitted local commit. It stops at the next real approval or external-action boundary. At the current checkpoint, it reports that Stage 14 needs approval; `Start Stage 14 according to plan.md` supplies that approval without another long prompt.
+Open the repository root in Claude Code or Codex and type `continue` (or `continue current research stage`). [AGENTS.md](AGENTS.md) directs the lead to read the current state/handoff, relevant plan and protocol, inspect live Git and evidence, reconcile stale state, state the bounded task, and work through verification and a permitted local commit. It stops at the next real approval or external-action boundary. At the current checkpoint, it reports that Stage 14 results await review and that Stage 15 needs approval; `Start Stage 15 according to plan.md` would supply that approval.
 
 Project truth is ordered: **formal protocol → plan → README → Git → current state/handoff → chat**. The state files carry operational context, never research authority. New approvals are recorded with their bounded scope; handoffs are compacted, not appended indefinitely. These are development instructions and must not be supplied to the evaluation agent.
 

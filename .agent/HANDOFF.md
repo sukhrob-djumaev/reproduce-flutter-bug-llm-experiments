@@ -1,13 +1,13 @@
 # Latest session handoff
 
-Session: 2026-10-11 — Stage 14 approved and opened (setup phase). No trials run, no code changed.
+Session: 2026-10-11/12 — Stage 14 opened and executed.
 
-- Cleaned worktree: moved protocol to `docs/` (`bc7a5b0`, `fd4a921`), removed untracked `.docx`. Entry checkpoint `fd4a921ead41ff8f6dbb7fcf19faab794a83131f`. Approval recorded in `81c9044`.
-- User approved candidates (3 local LM Studio models on disk) and 7 calibration cases (see CURRENT.md).
-- Finding: no agent-visible issue snapshots exist for public cases; upstream titles/bodies leak diagnoses. Fetched read-only copies into scratchpad only (not committed).
-- Checks run: git status/diff reads, LM Studio probe (server off), adb shows two devices attached. No tests/models run.
+- Moved the protocol into `docs/` and removed the stray `.docx` (`bc7a5b0`, `fd4a921`). Approved Stage 14 start, candidates (3 local models) and 7 calibration cases.
+- Wrote and user-approved symptom-only issue snapshots `issues/case_<id>.md`; hashes recorded in the ground-truth records.
+- Added public-case execution support: `agent/public_cases.py`, generic `text:`/`type:` targets and Driver-timeout handling in `agent/tools.py`, public-case/budget/outcome handling in `agent/main.py`, `agent/prestudy.py`; fixed config in `docs/stage_14_prestudy_config.md`.
+- Ran 63 trials; fixed harness issues (emulator storage, LM Studio stopping, S13-005 source subset, mislabeled model outcomes). 108 infrastructure-failure attempts are retained in `results/prestudy/ledger_superseded_attempts.jsonl`.
+- Results and limits: `docs/stage_14_prestudy_report.md`.
 
-- Snapshots approved and hashed (`c53de8a`, `cb39930`).
-- Finding: `agent/tools.py` only taps widgets exposing a string `ValueKey` through `flutter_driver_command` (needs `enableFlutterDriverExtension`). Public MRE sources have neither; per-case key edits would be case-specific tuning.
+Checks run: 5 offline unit tests (before the study); two sanity runs; full 63-attempt study; independent scoring script run. Offline unit tests re-run after the final edits: 5 passed. Not run: Flutter analysis.
 
-**Continuation point / user action:** choose the public-case interaction approach. Recommended: harness-side generic wrapper entrypoint (enables Driver extension without editing case code) plus generic text/type/tooltip-based targets from the widget tree, identical for all cases and candidates. Then build the workspace runner, fixed config file, and sanity trial (LM Studio must be started by the user).
+**Continuation point / user action:** review the report and decide the formal model / candidate changes (see CURRENT.md). Do not start Stage 15 without `Start Stage 15 according to plan.md`.
