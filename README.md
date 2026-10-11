@@ -25,7 +25,7 @@ RQ3 is deferred. The current work prepares a defensible RQ1/RQ2 study.
 
 ## Current Status
 
-The engineering pilot and the formal-design preparation are complete. The project is now ready for a deliberately small, stateful public-case curation experiment.
+The engineering pilot, formal-design preparation, and bounded public-case curation batches through Stage 13B are complete. Stage 14 (model-selection pre-study) is next and has not started. Beginning it requires explicit user approval; a clean tree alone is not approval.
 
 | Area | Status |
 | --- | --- |
@@ -34,12 +34,14 @@ The engineering pilot and the formal-design preparation are complete. The projec
 | PydanticAI migration and trace persistence | Complete |
 | Stage 10 formal RQ1/RQ2 protocol | Complete |
 | Stage 11 readiness contracts and curation intake materials | Complete |
-| Public Flutter case curation | Next: small experiment only |
-| Formal dataset of approximately 25 cases | Not started |
-| Model-selection pre-study | Not started |
+| Public Flutter case curation | Stages 12/13/13B committed; 13 accepted candidates from 21 attempted |
+| Formal dataset of approximately 25 cases | Not finalized or frozen; no calibration/formal split |
+| Model-selection pre-study | Stage 14 next; not started, awaiting approval |
 | Formal RQ1/RQ2 trials | Not started |
 
 The current development baseline is **PydanticAI 2.51.0** with **qwen2.5-7b-instruct** served locally through LM Studio's OpenAI-compatible endpoint. This is an engineering-development baseline, **not** the selected formal evaluation model.
+
+The latest curation checkpoint is `a58cf58` (`stage 13b: improve curated case diversity`). The curator-only `curation/stage13b_pool_summary.md` records the combined pool and indicative suitability; it does not select the formal dataset or authorize trials. See [.agent/CURRENT.md](.agent/CURRENT.md) for operational scope and [.agent/HANDOFF.md](.agent/HANDOFF.md) for the latest session's evidence; reconcile both against the plan, protocol, and live Git.
 
 ---
 
@@ -127,6 +129,10 @@ Only the first three are presently available in the development baseline. Source
 flutter-bug-reproduction/
 ├── README.md
 ├── plan.md
+├── stage_10_formal_evaluation_protocol.md
+├── AGENTS.md                    # shared local development contract
+├── CLAUDE.md                    # imports AGENTS.md for Claude Code
+├── .agent/                      # current scope and latest handoff, not research inputs
 ├── flutter_app/                 # synthetic pilot app and cases
 ├── issues/                      # synthetic agent-visible issue files
 ├── agent/                       # PydanticAI runner, model/configuration, tools
@@ -158,11 +164,11 @@ A formal case will require, at minimum:
 - a leakage-reviewed agent-visible issue snapshot;
 - no private credentials, uncontrolled backend, inaccessible hardware, or subjective-only judgement.
 
-The next step is deliberately **not** formal dataset collection. It is a small experiment to test whether this workflow works against real public reports.
+The initial curation experiment and two bounded expansion batches have been committed. Further curation needs its own approval; the next planned stage is model selection. The historical workflow below remains a reference for curation, not an instruction to resume searching.
 
 ### Stateful curation experiment
 
-The curator will use persistent files:
+The curator uses persistent files:
 
 ```text
 curation/search_state.csv  # every substantively inspected issue, comment, MRE link, or repository
@@ -171,7 +177,7 @@ curation/candidates.csv    # actual candidates and their triage/validation outco
 
 Before deep inspection, the curator canonicalizes the URL and checks `search_state.csv`. Previously inspected, accepted, or rejected material is skipped unless explicitly reopened. Rejected work remains recorded; it is benchmark-construction evidence, not disposable noise.
 
-The first experiment stops at the first of:
+The original Stage 12 plan specified stopping at the first of:
 
 - two accepted, manually reproduced public cases; or
 - five previously unseen candidates fully attempted.
@@ -182,7 +188,13 @@ Each outcome is recorded as `accepted`, `rejected`, or `deferred`, with a precis
 
 ## Development and Research Workflow
 
-Work remains phase-gated. One chat/session works on one approved stage only. A stage is complete only after its scoped work and checks are complete, the working tree is reviewed and clean, and the user has approved proceeding.
+Work remains phase-gated. A session stays within one approved scope; multiple fresh sessions may resume the same stage. Completion requires its scoped work/checks and a reviewed, clean tree. Beginning the next stage separately requires explicit user approval.
+
+Open the repository root in Claude Code or Codex and type `continue` (or `continue current research stage`). [AGENTS.md](AGENTS.md) directs the lead to read the current state/handoff, relevant plan and protocol, inspect live Git and evidence, reconcile stale state, state the bounded task, and work through verification and a permitted local commit. It stops at the next real approval or external-action boundary. At the current checkpoint, it reports that Stage 14 needs approval; `Start Stage 14 according to plan.md` supplies that approval without another long prompt.
+
+Project truth is ordered: **formal protocol → plan → README → Git → current state/handoff → chat**. The state files carry operational context, never research authority. New approvals are recorded with their bounded scope; handoffs are compacted, not appended indefinitely. These are development instructions and must not be supplied to the evaluation agent.
+
+Codex discovers the shared contract through [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md). The tiny `CLAUDE.md` uses Claude Code's [native import](https://code.claude.com/docs/en/memory#import-additional-files), so both use the same rules without relying on Claude's version/settings for direct AGENTS loading. No custom runtime, hook, service, or CLI is required. Markdown guides agent behavior; it is not a technical access-control or enforcement layer.
 
 If manual action is needed—such as starting an emulator, making a public repository available, selecting a model, or confirming runtime behavior—the agent must stop and request that action. It must not substitute unverified static evidence for runtime evidence.
 
@@ -196,7 +208,7 @@ Every completed stage reports:
 - unresolved issues and required user action;
 - Git status, commit hash, and relevant recent history.
 
-See `plan.md` for the operational stages, including the small public-case curation experiment and the later formal-study sequence.
+See `plan.md` for stage history, the next model-selection pre-study, and the later formal-study sequence.
 
 ---
 
