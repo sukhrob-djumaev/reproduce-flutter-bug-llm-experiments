@@ -158,3 +158,20 @@ async def running_case(case: str, device: str):
             except Exception:
                 process.kill()
                 await process.wait()
+        await _uninstall(workspace, device)
+
+
+async def _uninstall(workspace: Path, device: str) -> None:
+    """Remove the case package so emulator storage does not accumulate across cases."""
+    gradle = (workspace / "android" / "app" / "build.gradle.kts").read_text(encoding="utf-8")
+    match = re.search(r'applicationId\s*=\s*"([^"]+)"', gradle)
+    if match is None:
+        return
+    process = await asyncio.create_subprocess_exec(
+        "adb", "-s", device, "uninstall", match.group(1),
+        stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL,
+    )
+    try:
+        await asyncio.wait_for(process.wait(), 60)
+    except asyncio.TimeoutError:
+        process.kill()

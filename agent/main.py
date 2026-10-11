@@ -8,7 +8,8 @@ from time import monotonic
 from typing import Literal
 
 from pydantic import BaseModel
-from pydantic_ai import Agent
+from pydantic_ai import Agent, capture_run_messages
+from pydantic_ai.exceptions import UnexpectedModelBehavior, UsageLimitExceeded
 from pydantic_ai.usage import UsageLimits
 from pydantic_ai.messages import ModelMessagesTypeAdapter
 
@@ -56,7 +57,9 @@ class RuntimeAttempt:
     issue_text: str
     instructions: str
     model_name: str
-    result: ReproductionResult
+    result: ReproductionResult | None
+    termination: str
+    failure: str | None
     messages_json: str
     calls: tuple[object, ...]
     normalized_inspection: str | None
@@ -124,19 +127,31 @@ async def run_flutter_runtime_attempt(case: str, workspace: Path | None = None, 
             return await adapter.get_runtime_errors()
 
         started_at = monotonic()
-        run = await agent.run(
-            f"Reported issue:\n\n{issue_text}",
-            usage_limits=UsageLimits(request_limit=STUDY_REQUEST_LIMIT) if workspace else None,
-        )
+        result: ReproductionResult | None = None
+        termination = "natural"
+        failure: str | None = None
+        with capture_run_messages() as captured_messages:
+            try:
+                run = await agent.run(
+                    f"Reported issue:\n\n{issue_text}",
+                    usage_limits=UsageLimits(request_limit=STUDY_REQUEST_LIMIT) if workspace else None,
+                )
+                result = run.output
+            except UsageLimitExceeded as error:
+                termination, failure = "budget_exhausted", str(error)
+            except UnexpectedModelBehavior as error:
+                termination, failure = "invalid_output", str(error)
         duration_seconds = monotonic() - started_at
-        messages = run.all_messages()
+        messages = run.all_messages() if result is not None else list(captured_messages)
         return RuntimeAttempt(
             case=case,
             issue_path=issue_path,
             issue_text=issue_text,
             instructions=REPRODUCTION_INSTRUCTIONS,
             model_name=config.model_name,
-            result=run.output,
+            result=result,
+            termination=termination,
+            failure=failure,
             messages_json=ModelMessagesTypeAdapter.dump_json(messages, indent=2).decode(),
             calls=adapter.calls,
             normalized_inspection=adapter.normalized_inspection,
@@ -161,8 +176,8 @@ def _print_attempt(
     print(attempt.issue_text)
     print("Agent instruction:")
     print(attempt.instructions)
-    print(f"Typed result: {attempt.result.model_dump_json()}")
-    print("Termination: natural PydanticAI completion")
+    print(f"Typed result: {attempt.result.model_dump_json() if attempt.result else None}")
+    print(f"Termination: {attempt.termination}" + (f" ({attempt.failure})" if attempt.failure else ""))
     print(f"Duration seconds: {attempt.duration_seconds:.2f}")
     print(f"Turns: {attempt.turns}")
     print("Underlying Dart MCP trace:")
@@ -200,8 +215,8 @@ def main() -> None:
             case=attempt.case,
             model=attempt.model_name,
             capabilities=str(CapabilityMode.FULL),
-            status=attempt.result.status,
-            evidence=attempt.result.evidence,
+            status=attempt.result.status if attempt.result else f"NO_RESULT_{attempt.termination.upper()}",
+            evidence=attempt.result.evidence if attempt.result else (attempt.failure or ""),
             duration_seconds=attempt.duration_seconds,
             turns=attempt.turns,
             messages_json=attempt.messages_json,
