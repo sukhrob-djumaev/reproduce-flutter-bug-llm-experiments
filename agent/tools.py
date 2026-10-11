@@ -24,13 +24,13 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 FLUTTER_APP_ROOT = PROJECT_ROOT / "flutter_app"
 
 
-def create_flutter_mcp_toolset() -> MCPToolset:
-    """Connect PydanticAI's MCP client to the existing Dart MCP server."""
+def create_flutter_mcp_toolset(workspace: Path | None = None) -> MCPToolset:
+    """Connect PydanticAI's MCP client to the Dart MCP server for the given workspace."""
     return MCPToolset(
         StdioTransport(
             command="dart",
             args=["mcp-server", "--force-roots-fallback"],
-            cwd=str(FLUTTER_APP_ROOT),
+            cwd=str(workspace or FLUTTER_APP_ROOT),
         ),
         tool_error_behavior="error",
     )
@@ -74,6 +74,9 @@ class FlutterRuntimeAdapter:
         r"renderedErrorText: .*?The following (?P<type>.+?) was thrown.*?\n"
         r"(?P<summary>.+?)(?:\n|$)",
         re.DOTALL,
+    )
+    _INTERACTIVE_WIDGET_PATTERN = re.compile(
+        r"Button|Menu|^Tab$|TextField|ListTile|InkWell|GestureDetector|Checkbox|Switch|Radio|Chip|Slider"
     )
     _STRING_VALUE_KEY_PATTERN = re.compile(r"-\[<'([^']+)'\>")
 
@@ -198,9 +201,7 @@ class FlutterRuntimeAdapter:
             "flutter_driver_command",
             {
                 "command": command,
-                "finderType": "ByValueKey",
-                "keyValueString": target,
-                "keyValueType": "String",
+                **self._finder_arguments(target),
                 "appUri": await self._get_app_uri(),
                 "timeout": "5000",
             },
@@ -209,6 +210,31 @@ class FlutterRuntimeAdapter:
             self._actionable_targets.clear()
             self._has_current_inspection = False
         return result
+
+    @staticmethod
+    def _finder_arguments(target: str) -> dict[str, str]:
+        """Map a model-facing target to a Flutter Driver finder (generic, case-independent)."""
+        # Driver actions fail on ambiguous finders, so text/type targets resolve to the
+        # first match (document order) via an Ancestor finder that matches the root.
+        if target.startswith("text:"):
+            finder: dict[str, str] = {"finderType": "ByText", "text": target[len("text:") :]}
+        elif target.startswith("type:"):
+            finder = {"finderType": "ByType", "type": target[len("type:") :]}
+        else:
+            finder = {}
+        if finder:
+            return {
+                "finderType": "Ancestor",
+                "of": finder,
+                "matching": finder,
+                "matchRoot": "true",
+                "firstMatchOnly": "true",
+            }
+        return {
+            "finderType": "ByValueKey",
+            "keyValueString": target,
+            "keyValueType": "String",
+        }
 
     async def _call_text(self, tool_name: str, arguments: dict[str, Any]) -> str:
         started_at = monotonic()
@@ -388,6 +414,10 @@ class FlutterRuntimeAdapter:
             target = self._value_key_for(node)
             widget_type = str(node.get("widgetRuntimeType", "Widget"))
             visible_text = self._visible_text(node)
+            if target is None and self._INTERACTIVE_WIDGET_PATTERN.search(widget_type):
+                target = f"text:{visible_text}" if visible_text else f"type:{widget_type}"
+                if target in self._actionable_targets:
+                    continue
             if target is not None:
                 element: dict[str, str] = {
                     "type": self._element_type(widget_type),

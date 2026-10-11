@@ -9,6 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 from pydantic_ai import Agent
+from pydantic_ai.usage import UsageLimits
 from pydantic_ai.messages import ModelMessagesTypeAdapter
 
 from capabilities import CapabilityMode
@@ -18,9 +19,15 @@ from models import (
     get_local_model_config,
     verify_configured_model,
 )
+from public_cases import CALIBRATION_CASES, is_public_case, issue_path as public_issue_path, running_case
 from results import persist_run
 from tools import FlutterRuntimeAdapter, create_flutter_mcp_toolset
 
+
+# Stage 14 pre-study configuration: identical for every candidate model and public case.
+STUDY_TEMPERATURE = 0.2
+STUDY_REQUEST_LIMIT = 40
+STUDY_DEVICE = "emulator-5556"
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 ISSUES_DIRECTORY = PROJECT_ROOT / "issues"
@@ -59,18 +66,18 @@ class RuntimeAttempt:
 
 def load_issue(case: str) -> tuple[Path, str]:
     """Load the natural-language issue report supplied to the model."""
-    issue_path = ISSUES_DIRECTORY / f"case_{case}.md"
+    issue_path = public_issue_path(case) if is_public_case(case) else ISSUES_DIRECTORY / f"case_{case}.md"
     return issue_path, issue_path.read_text(encoding="utf-8")
 
 
-async def run_flutter_runtime_attempt(case: str) -> RuntimeAttempt:
+async def run_flutter_runtime_attempt(case: str, workspace: Path | None = None) -> RuntimeAttempt:
     """Run PydanticAI normally; it owns the tool loop and natural termination."""
     issue_path, issue_text = load_issue(case)
     config = get_local_model_config()
     client = create_local_client(config)
     await verify_configured_model(config, client)
 
-    mcp_toolset = create_flutter_mcp_toolset()
+    mcp_toolset = create_flutter_mcp_toolset(workspace)
     async with mcp_toolset:
         discovered_tool_names = {tool.name for tool in await mcp_toolset.list_tools()}
         required_tools = {
@@ -92,7 +99,7 @@ async def run_flutter_runtime_attempt(case: str) -> RuntimeAttempt:
             create_local_model(config, client),
             output_type=ReproductionResult,
             instructions=REPRODUCTION_INSTRUCTIONS,
-            model_settings={"temperature": 0.0},
+            model_settings={"temperature": STUDY_TEMPERATURE if workspace else 0.0},
             end_strategy="graceful",
         )
 
@@ -117,7 +124,10 @@ async def run_flutter_runtime_attempt(case: str) -> RuntimeAttempt:
             return await adapter.get_runtime_errors()
 
         started_at = monotonic()
-        run = await agent.run(f"Reported issue:\n\n{issue_text}")
+        run = await agent.run(
+            f"Reported issue:\n\n{issue_text}",
+            usage_limits=UsageLimits(request_limit=STUDY_REQUEST_LIMIT) if workspace else None,
+        )
         duration_seconds = monotonic() - started_at
         messages = run.all_messages()
         return RuntimeAttempt(
@@ -169,15 +179,23 @@ def _print_attempt(
 def _parse_arguments() -> argparse.Namespace:
     """Accept one existing issue case without selecting a model or capability variant."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--case", required=True, choices=["001", "002", "003", "004", "005"])
+    parser.add_argument("--case", required=True, choices=["001", "002", "003", "004", "005", *CALIBRATION_CASES])
     return parser.parse_args()
+
+
+async def _run_case(case: str) -> RuntimeAttempt:
+    """Synthetic cases use the already-running pilot app; public cases get a fresh launch."""
+    if not is_public_case(case):
+        return await run_flutter_runtime_attempt(case)
+    async with running_case(case, STUDY_DEVICE) as workspace:
+        return await run_flutter_runtime_attempt(case, workspace)
 
 
 def main() -> None:
     """Run and persist one issue-driven reproduction attempt."""
     arguments = _parse_arguments()
     try:
-        attempt = asyncio.run(run_flutter_runtime_attempt(arguments.case))
+        attempt = asyncio.run(_run_case(arguments.case))
         run_id, result_path, trace_path = persist_run(
             case=attempt.case,
             model=attempt.model_name,

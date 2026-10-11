@@ -38,3 +38,4 @@ models/
 # Temporary experiment output
 results/runs/*
 !results/runs/.gitkeep
+results/workspaces/
