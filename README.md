@@ -129,7 +129,7 @@ Only the first three are presently available in the development baseline. Source
 flutter-bug-reproduction/
 ├── README.md
 ├── plan.md
-├── stage_10_formal_evaluation_protocol.md
+├── docs/                        # research proposal and stage_10_formal_evaluation_protocol.md
 ├── AGENTS.md                    # shared local development contract
 ├── CLAUDE.md                    # imports AGENTS.md for Claude Code
 ├── .agent/                      # current scope and latest handoff, not research inputs
