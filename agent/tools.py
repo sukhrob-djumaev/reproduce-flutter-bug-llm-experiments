@@ -80,8 +80,9 @@ class FlutterRuntimeAdapter:
     )
     _STRING_VALUE_KEY_PATTERN = re.compile(r"-\[<'([^']+)'\>")
 
-    def __init__(self, mcp_toolset: MCPToolset) -> None:
+    def __init__(self, mcp_toolset: MCPToolset, dtd_uri: str | None = None) -> None:
         self._mcp_toolset = mcp_toolset
+        self._dtd_uri = dtd_uri
         self._app_uri: str | None = None
         self._calls: list[UnderlyingMCPCall] = []
         self._actionable_targets: set[str] = set()
@@ -172,8 +173,11 @@ class FlutterRuntimeAdapter:
     async def _get_app_uri(self) -> str:
         if self._app_uri is not None:
             return self._app_uri
-        dtd_uris = await self._call_text("dtd", {"command": "listDtdUris"})
-        dtd_uri = self._first_uri(dtd_uris, self._DTD_URI_PATTERN, "DTD URI")
+        if self._dtd_uri is not None:
+            dtd_uri = self._dtd_uri
+        else:
+            dtd_uris = await self._call_text("dtd", {"command": "listDtdUris"})
+            dtd_uri = self._first_uri(dtd_uris, self._DTD_URI_PATTERN, "DTD URI")
         await self._call_text("dtd", {"command": "connect", "uri": dtd_uri})
         apps = await self._call_text("dtd", {"command": "listConnectedApps"})
         self._app_uri = self._first_uri(apps, self._APP_URI_PATTERN, "app URI")

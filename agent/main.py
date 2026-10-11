@@ -70,7 +70,7 @@ def load_issue(case: str) -> tuple[Path, str]:
     return issue_path, issue_path.read_text(encoding="utf-8")
 
 
-async def run_flutter_runtime_attempt(case: str, workspace: Path | None = None) -> RuntimeAttempt:
+async def run_flutter_runtime_attempt(case: str, workspace: Path | None = None, dtd_uri: str | None = None) -> RuntimeAttempt:
     """Run PydanticAI normally; it owns the tool loop and natural termination."""
     issue_path, issue_text = load_issue(case)
     config = get_local_model_config()
@@ -93,7 +93,7 @@ async def run_flutter_runtime_attempt(case: str, workspace: Path | None = None) 
                 f"{sorted(missing_tools)}; available: {sorted(discovered_tool_names)}"
             )
 
-        adapter = FlutterRuntimeAdapter(mcp_toolset)
+        adapter = FlutterRuntimeAdapter(mcp_toolset, dtd_uri)
         await adapter.begin_runtime_error_window()
         agent = Agent(
             create_local_model(config, client),
@@ -187,8 +187,8 @@ async def _run_case(case: str) -> RuntimeAttempt:
     """Synthetic cases use the already-running pilot app; public cases get a fresh launch."""
     if not is_public_case(case):
         return await run_flutter_runtime_attempt(case)
-    async with running_case(case, STUDY_DEVICE) as workspace:
-        return await run_flutter_runtime_attempt(case, workspace)
+    async with running_case(case, STUDY_DEVICE) as (workspace, dtd_uri):
+        return await run_flutter_runtime_attempt(case, workspace, dtd_uri)
 
 
 def main() -> None:

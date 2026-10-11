@@ -127,7 +127,7 @@ async def running_case(case: str, device: str):
     )
     output: list[str] = []
 
-    async def wait_until_ready() -> None:
+    async def wait_until_ready() -> str:
         assert process.stdout is not None
         while True:
             line = await process.stdout.readline()
@@ -135,8 +135,9 @@ async def running_case(case: str, device: str):
                 raise RuntimeError("flutter run exited before the app was ready:\n" + "".join(output[-30:]))
             text = line.decode(errors="replace")
             output.append(text)
-            if "Dart Tooling Daemon is available" in text:
-                return
+            match = re.search(r"Dart Tooling Daemon is available at: (ws://\S+)", text)
+            if match:
+                return match.group(1)
 
     async def drain() -> None:
         assert process.stdout is not None
@@ -144,9 +145,9 @@ async def running_case(case: str, device: str):
             pass
 
     try:
-        await asyncio.wait_for(wait_until_ready(), APP_START_TIMEOUT_SECONDS)
+        dtd_uri = await asyncio.wait_for(wait_until_ready(), APP_START_TIMEOUT_SECONDS)
         drainer = asyncio.create_task(drain())
-        yield workspace
+        yield workspace, dtd_uri
     finally:
         if process.returncode is None:
             try:
