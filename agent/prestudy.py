@@ -10,6 +10,8 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import time
+import urllib.request
 from time import monotonic
 
 from public_cases import CALIBRATION_CASES
@@ -24,13 +26,57 @@ CANDIDATE_MODELS = (
     "qwen3.5-9b-claude-4.6-opus-reasoning-distilled",
 )
 TRIALS_PER_CASE = 3
-MAX_INFRASTRUCTURE_ATTEMPTS = 2
+MAX_INFRASTRUCTURE_ATTEMPTS = 3
+DEVICE = "emulator-5556"
+EMULATOR = Path.home() / "Library" / "Android" / "sdk" / "emulator" / "emulator"
+AVD = "Medium_Phone_API_36-ext19"
 ATTEMPT_TIMEOUT_SECONDS = 1500
 
 
 def _load_model(model: str) -> None:
     subprocess.run([str(LMS), "unload", "--all"], capture_output=True, text=True)
     subprocess.run([str(LMS), "load", model, "-y"], check=True, capture_output=True, text=True)
+
+
+def _server_up() -> bool:
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:1234/v1/models", timeout=5) as response:
+            return response.status == 200
+    except Exception:
+        return False
+
+
+def _model_loaded(model: str) -> bool:
+    listing = subprocess.run([str(LMS), "ps"], capture_output=True, text=True).stdout
+    return model in listing
+
+
+def _ensure_model(model: str) -> None:
+    """Infrastructure upkeep: restart the LM Studio server / reload the model if needed."""
+    if not _server_up():
+        subprocess.run([str(LMS), "server", "start"], capture_output=True, text=True)
+    if not _server_up() or not _model_loaded(model):
+        _load_model(model)
+
+
+def _emulator_healthy() -> bool:
+    boot = subprocess.run(["adb", "-s", DEVICE, "shell", "getprop", "sys.boot_completed"], capture_output=True, text=True)
+    package = subprocess.run(["adb", "-s", DEVICE, "shell", "pm", "path", "android"], capture_output=True, text=True)
+    return boot.stdout.strip() == "1" and package.returncode == 0 and "package:" in package.stdout
+
+
+def _restart_emulator() -> None:
+    subprocess.run(["adb", "-s", DEVICE, "emu", "kill"], capture_output=True, text=True)
+    time.sleep(10)
+    subprocess.Popen(
+        [str(EMULATOR), "-avd", AVD, "-no-window", "-no-audio", "-read-only", "-port", "5556"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True,
+    )
+    for _ in range(90):
+        time.sleep(4)
+        if _emulator_healthy():
+            time.sleep(15)
+            return
 
 
 def _log_path(model: str, case: str, trial: int) -> Path:
@@ -56,6 +102,9 @@ def main() -> None:
                     _load_model(model)
                     loaded = True
                 for attempt in range(1, MAX_INFRASTRUCTURE_ATTEMPTS + 1):
+                    _ensure_model(model)
+                    if not _emulator_healthy():
+                        _restart_emulator()
                     started = monotonic()
                     try:
                         completed = subprocess.run(

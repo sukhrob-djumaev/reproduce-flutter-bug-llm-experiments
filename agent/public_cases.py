@@ -47,7 +47,21 @@ def issue_path(case: str) -> Path:
     return ISSUES_DIRECTORY / f"case_{case}.md"
 
 
+def _flutter_sdk_root() -> Path:
+    flutter = shutil.which("flutter")
+    if flutter is None:
+        raise RuntimeError("flutter is not on PATH")
+    return Path(flutter).resolve().parent.parent
+
+
 def _source_directory(case: str) -> Path:
+    if case == "S13-005":
+        # The curated copy holds only the changed-file subset; the app is the SDK dev app.
+        sdk_app = _flutter_sdk_root() / "dev" / "a11y_assessments"
+        curated = next(iter(sorted(ACCEPTED_DIRECTORY.glob(f"*/{case}/source"))))
+        if (sdk_app / "lib" / "main.dart").read_bytes() != (curated / "lib" / "main.dart").read_bytes():
+            raise RuntimeError("SDK a11y_assessments main.dart differs from the curated S13-005 revision")
+        return sdk_app
     matches = sorted(ACCEPTED_DIRECTORY.glob(f"*/{case}/source"))
     if len(matches) != 1:
         raise RuntimeError(f"Expected one curated source directory for {case}: {matches}")
