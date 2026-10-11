@@ -35,4 +35,7 @@ No automatic Stage 14 start, trials, new curation, agent/prompt/tool changes, ca
 ## Stage 14 local facts (2026-10-11)
 
 - LM Studio server not running at 127.0.0.1:1234. Locally downloaded models: Qwen2.5-7B-Instruct Q4_K_M, Qwen3.5-9B (lmstudio-community), Qwen3.5-9B Claude-Opus-reasoning-distilled (Jackrong). No cloud API keys in env.
-- Pending user decisions: final candidate set (2–4), calibration membership (6–8 of the 7 indicative: S12-001, S12-003, S12-004, S13-002, S13-005, S13B-002, S13B-003).
+- Decisions (user, 2026-10-11, "Agree to you"): candidates = the three local models above (no downloads/paid APIs); calibration = the seven indicative cases S12-001, S12-003, S12-004, S13-002, S13-005, S13B-002, S13B-003.
+- Finding: all 13 ground-truth records have `issue_snapshot_path_or_hash: NOT_FINALIZED`; no agent-visible issue text exists for public cases. Raw upstream issue titles/bodies include source-level diagnoses (e.g. widget/key/assertion names), so they cannot be given to the agent verbatim (AGENTS.md leakage rule).
+- Blocker / pending user decision: policy for producing leakage-reviewed, symptom-only issue snapshots for the 7 calibration cases (see HANDOFF).
+- Other setup gaps (not yet started): per-case build/launch/reset workspace for public sources (MCP cwd is fixed to `flutter_app`), LM Studio server off, public-case `--case` support, tools for S13-002/S13B-002 interactions beyond tap/inspect.
