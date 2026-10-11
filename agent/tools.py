@@ -197,15 +197,30 @@ class FlutterRuntimeAdapter:
                 },
                 separators=(",", ":"),
             )
-        result = await self._call_text(
-            "flutter_driver_command",
-            {
-                "command": command,
-                **self._finder_arguments(target),
-                "appUri": await self._get_app_uri(),
-                "timeout": "5000",
-            },
-        )
+        try:
+            result = await self._call_text(
+                "flutter_driver_command",
+                {
+                    "command": command,
+                    **self._finder_arguments(target),
+                    "appUri": await self._get_app_uri(),
+                    "timeout": "5000",
+                },
+            )
+        except ToolError as error:
+            if "Timed out waiting for Flutter Driver" not in str(error):
+                raise
+            # An action that never settles is an observable app outcome, not a harness crash.
+            self._actionable_targets.clear()
+            self._has_current_inspection = False
+            return json.dumps(
+                {
+                    "ok": False,
+                    "target": target,
+                    "reason": "the action did not complete within 5 seconds; the app may be unresponsive or in an error state",
+                },
+                separators=(",", ":"),
+            )
         if command == "tap":
             self._actionable_targets.clear()
             self._has_current_inspection = False
