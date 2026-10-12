@@ -15,7 +15,7 @@ Recorded 2026-10-12 after the first pre-study run (`docs/stage_14_prestudy_repor
 | `Meta-Llama-3.1-8B-Instruct` (lmstudio-community Q4_K_M, 4.92 GB) | Different family and tool-call format, so the result is not Qwen-specific; Meta reports best-in-class 8B tool-use scores (self-reported, Llama 3). | [Llama 3 paper](https://arxiv.org/pdf/2407.21783) |
 | `qwen/qwen3.5-9b` (lmstudio-community GGUF) | Highest third-party BFCL-v4 figure among sub-10B models (0.661); failed in run 1 because tool calls were emitted inside the reasoning channel, so it is rerun under the uniform thinking setting below. | [d-central](https://d-central.tech/local-llm-agent-capability/); LM Studio parsing fix in 0.4.7 [changelog](https://lmstudio.ai/changelog/lmstudio-v0.4.7) did not resolve run 1 on 0.4.12 |
 
-Reserve (not run unless a shortlisted model cannot load): Granite 4.1 8B ([Labellerr](https://labellerr.com/blog/best-small-language-models-under-10b-parameters/)).
+Fifth candidate, added 2026-10-12 at the user's request (one more model family): `granite-4.1-8b` (Unsloth GGUF, Q4_K_S, 5.09 GB; IBM, Apache 2.0), described as strong for enterprise tool-calling workflows ([Labellerr](https://labellerr.com/blog/best-small-language-models-under-10b-parameters/)); LM Studio lists the Granite 4.1 family ([LM Studio](https://lmstudio.ai/models/granite-4.1)). Note the quantization differs (Q4_K_S, from a different publisher) from the other candidates' Q4_K_M; this is a recorded limitation. Run as revision 2 after the other three.
 
 ## Excluded
 - `qwen3.5-9b-claude-4.6-opus-reasoning-distilled`: no independent tool-calling evidence; run 1 result (0/21 executable calls) stays on record.

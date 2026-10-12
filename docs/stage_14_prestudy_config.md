@@ -14,3 +14,5 @@ Recorded 2026-10-11, under protocol §9 and plan Stage 14. Identical for every c
 
 ## Revision 2 (2026-10-12, approved by the user)
 Candidate set revised per `docs/stage_14_candidate_rationale.md`. Everything above is unchanged except: (a) thinking/reasoning is disabled for every candidate through the request field `reasoning_effort: "none"` (accepted by all candidates in a compatibility check; a no-op for models without a thinking mode), and (b) the revision-2 candidates are `qwen/qwen3-8b`, `meta-llama-3.1-8b-instruct`, and `qwen/qwen3.5-9b`. Revision-1 results (thinking default) remain on record in `ledger.jsonl`; revision 2 is logged in `ledger_r2.jsonl`. The `qwen2.5-7b-instruct` revision-1 trials are kept and not rerun, because the reasoning switch does not apply to it.
+
+Revision 2 addendum (2026-10-12): `granite-4.1-8b` added as a fifth candidate by user request; same fixed configuration. Paid/cloud models are not part of this run.
