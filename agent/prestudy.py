@@ -80,19 +80,26 @@ def _restart_emulator() -> None:
 
 
 def _log_path(model: str, case: str, trial: int) -> Path:
-    return OUTPUT_DIRECTORY / f"{model.replace('/', '_')}__{case}__t{trial}.log"
+    return OUTPUT_DIRECTORY / f"{model.replace('/', '_')}__{case}__t{trial}{'' if os.environ.get('STUDY_REVISION', '1') == '1' else '__r2'}.log"
 
 
 def main() -> None:
+    """Usage: prestudy.py [--revision 2 MODEL...]; revision 1 is the original thinking-default run."""
+    arguments = sys.argv[1:]
+    revision = "1"
+    models = CANDIDATE_MODELS
+    if arguments[:2] == ["--revision", "2"]:
+        revision, models = "2", tuple(arguments[2:])
+    os.environ["STUDY_REVISION"] = revision
     OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
-    ledger_path = OUTPUT_DIRECTORY / "ledger.jsonl"
+    ledger_path = OUTPUT_DIRECTORY / ("ledger.jsonl" if revision == "1" else "ledger_r2.jsonl")
     done = set()
     if ledger_path.exists():
         for line in ledger_path.read_text().splitlines():
             record = json.loads(line)
             if record["outcome"] == "completed":
                 done.add((record["model"], record["case"], record["trial"]))
-    for model in CANDIDATE_MODELS:
+    for model in models:
         loaded = False
         for case in CALIBRATION_CASES:
             for trial in range(1, TRIALS_PER_CASE + 1):
@@ -110,7 +117,7 @@ def main() -> None:
                         completed = subprocess.run(
                             [sys.executable, "main.py", "--case", case],
                             cwd=Path(__file__).resolve().parent,
-                            env={**os.environ, "LM_STUDIO_MODEL": model, "PYDANTIC_AI_NO_BANNER": "1"},
+                            env={**os.environ, "LM_STUDIO_MODEL": model, "PYDANTIC_AI_NO_BANNER": "1", "STUDY_REVISION": revision},
                             capture_output=True,
                             text=True,
                             timeout=ATTEMPT_TIMEOUT_SECONDS,
@@ -121,6 +128,7 @@ def main() -> None:
                     _log_path(model, case, trial).write_text(output, encoding="utf-8")
                     run_id = re.search(r"^Run ID: (\S+)", output, re.MULTILINE)
                     record = {
+                        "revision": revision,
                         "model": model,
                         "case": case,
                         "trial": trial,

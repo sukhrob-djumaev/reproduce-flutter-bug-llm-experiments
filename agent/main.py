@@ -2,6 +2,7 @@
 
 import asyncio
 import argparse
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from time import monotonic
@@ -29,6 +30,8 @@ from tools import FlutterRuntimeAdapter, create_flutter_mcp_toolset
 STUDY_TEMPERATURE = 0.2
 STUDY_REQUEST_LIMIT = 40
 STUDY_DEVICE = "emulator-5556"
+# Revision 2 (2026-10-12): thinking disabled uniformly for every candidate.
+STUDY_EXTRA_BODY = {"reasoning_effort": "none"}
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 ISSUES_DIRECTORY = PROJECT_ROOT / "issues"
@@ -102,7 +105,11 @@ async def run_flutter_runtime_attempt(case: str, workspace: Path | None = None, 
             create_local_model(config, client),
             output_type=ReproductionResult,
             instructions=REPRODUCTION_INSTRUCTIONS,
-            model_settings={"temperature": STUDY_TEMPERATURE if workspace else 0.0},
+            model_settings=(
+                {"temperature": STUDY_TEMPERATURE, "extra_body": STUDY_EXTRA_BODY}
+                if (workspace and os.environ.get("STUDY_REVISION") == "2")
+                else {"temperature": STUDY_TEMPERATURE if workspace else 0.0}
+            ),
             end_strategy="graceful",
         )
 
