@@ -12,6 +12,9 @@ Updated: 2026-10-12. Operational state only; the formal protocol and `plan.md` g
 ## Update 2026-10-12
 User chose a research-backed shortlist (`docs/stage_14_candidate_rationale.md`) and approved downloads of qwen/qwen3-8b and Meta-Llama-3.1-8B-Instruct (both downloaded). Approval of a uniform thinking-off setting is still pending; no additional trials have run. Reruns: qwen3-8b, llama-3.1-8b, qwen3.5-9b.
 
+## Docs-only research (user-approved 2026-10-12, overnight)
+`docs/bug_evidence_review.md` drafted (evidence for bug classes/mix). No protocol change, no curation, no Stage 15. Options A/B/C in that file await the user's choice.
+
 ## Pending user decisions
 1. Accept `qwen2.5-7b-instruct` as formal model, or change the candidate set (e.g. reserve Qwen3.5 with thinking disabled, add another tool-calling model; downloads/paid APIs need approval) and rerun.
 2. Then `Start Stage 15 according to plan.md`.
