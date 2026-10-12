@@ -9,6 +9,9 @@ Updated: 2026-10-12. Operational state only; the formal protocol and `plan.md` g
 - **Result summary:** 63/63 attempts persisted. qwen2.5-7b-instruct: executable tool calls 21/21, natural termination 14/21, predicate evidenced 4/21. Both Qwen3.5 candidates: 0 executable tool calls (tool calls emitted in reasoning channel via LM Studio) -> ineligible as configured. Rule selects qwen2.5-7b-instruct by elimination; this is a recommendation, not an approval.
 - **Approved scope now:** none beyond reviewing/answering about Stage 14. No Stage 15, new curation, candidate reconfiguration, extra trials, or formal runs without explicit user approval.
 
+## Update 2026-10-12
+User chose a research-backed shortlist (`docs/stage_14_candidate_rationale.md`) and approved downloads of qwen/qwen3-8b and Meta-Llama-3.1-8B-Instruct (both downloaded). Approval of a uniform thinking-off setting is still pending; no additional trials have run. Reruns: qwen3-8b, llama-3.1-8b, qwen3.5-9b.
+
 ## Pending user decisions
 1. Accept `qwen2.5-7b-instruct` as formal model, or change the candidate set (e.g. reserve Qwen3.5 with thinking disabled, add another tool-calling model; downloads/paid APIs need approval) and rerun.
 2. Then `Start Stage 15 according to plan.md`.
