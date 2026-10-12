@@ -212,17 +212,17 @@ class FlutterRuntimeAdapter:
                 },
             )
         except ToolError as error:
-            if "Timed out waiting for Flutter Driver" not in str(error):
-                raise
-            # An action that never settles is an observable app outcome, not a harness crash.
+            # A driver action that fails or never settles is an observable app outcome, not a
+            # harness crash; report it to the model as an ordinary tool result.
             self._actionable_targets.clear()
             self._has_current_inspection = False
+            reason = (
+                "the action did not complete within 5 seconds; the app may be unresponsive or in an error state"
+                if "Timed out waiting for Flutter Driver" in str(error)
+                else "the target could not be found or used; call inspect_app() again"
+            )
             return json.dumps(
-                {
-                    "ok": False,
-                    "target": target,
-                    "reason": "the action did not complete within 5 seconds; the app may be unresponsive or in an error state",
-                },
+                {"ok": False, "target": target, "reason": reason},
                 separators=(",", ":"),
             )
         if command == "tap":

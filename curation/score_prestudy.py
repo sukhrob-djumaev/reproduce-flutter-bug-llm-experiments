@@ -15,8 +15,10 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def events(run_id: str) -> list[dict]:
+    """Agent-originated tool events only; the harness's own error-window priming call is excluded."""
     path = ROOT / "results" / "runs" / run_id / "tool_events.json"
-    return json.loads(path.read_text()) if path.exists() else []
+    loaded = json.loads(path.read_text()) if path.exists() else []
+    return [e for e in loaded if not e.get("arguments", {}).get("clearRuntimeErrors")]
 
 
 def text_of(run_id: str, tool: str | None = None) -> str:
@@ -58,14 +60,20 @@ def score(case: str, run_id: str) -> bool:
 
 
 def main() -> None:
-    ledger = [json.loads(l) for l in (ROOT / "results" / "prestudy" / "ledger.jsonl").read_text().splitlines()]
+    ledger = []
+    for name, revision in (("ledger.jsonl", "1"), ("ledger_r2.jsonl", "2")):
+        path = ROOT / "results" / "prestudy" / name
+        if path.exists():
+            ledger += [{"revision": revision, **json.loads(l)} for l in path.read_text().splitlines() if l.strip()]
     out = ROOT / "results" / "prestudy" / "scores.csv"
     with out.open("w", newline="") as handle:
         writer = csv.writer(handle)
-        writer.writerow(["model", "case", "trial", "run_id", "status", "predicate_evidenced"])
+        writer.writerow(["revision", "model", "case", "trial", "run_id", "status", "predicate_evidenced"])
         for row in ledger:
+            if row["outcome"] != "completed":
+                continue
             result = json.loads((ROOT / "results" / "runs" / row["run_id"] / "result.json").read_text())
-            writer.writerow([row["model"], row["case"], row["trial"], row["run_id"], result["status"], int(score(row["case"], row["run_id"]))])
+            writer.writerow([row["revision"], row["model"], row["case"], row["trial"], row["run_id"], result["status"], int(score(row["case"], row["run_id"]))])
     print(out)
 
 
