@@ -52,6 +52,20 @@ async def verify_configured_model(config: LocalModelConfig, client: AsyncOpenAI)
         )
 
 
+def uses_anthropic_reference() -> bool:
+    """True only for the labelled paid reference run (STUDY_PROVIDER=anthropic); the default is LM Studio."""
+    return os.getenv("STUDY_PROVIDER") == "anthropic"
+
+
+def create_anthropic_model(model_name: str):
+    """Anthropic model for the reference run; ANTHROPIC_API_KEY is read from the environment only."""
+    from pydantic_ai.models.anthropic import AnthropicModel
+
+    if not os.getenv("ANTHROPIC_API_KEY"):
+        raise RuntimeError("ANTHROPIC_API_KEY is not set in the environment")
+    return AnthropicModel(model_name)
+
+
 def create_local_model(config: LocalModelConfig, client: AsyncOpenAI) -> OpenAIChatModel:
     """Create PydanticAI's OpenAI-compatible model for LM Studio."""
     provider = OpenAIProvider(openai_client=client)

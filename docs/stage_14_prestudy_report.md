@@ -61,7 +61,20 @@ Observations (directional, not a powered comparison):
 
 **Infrastructure failures (revision 2, separate from model outcomes):** 11 Qwen3.5 attempts, retained in the ledger as `infrastructure_failure` and retried: 10 from a harness bug (a Driver `get_text` "No element" error raised as an exception; fixed by returning driver errors as ordinary tool results, commit `d71c5b2`) and 1 connection failure. An earlier session loss (LM Studio force-quit for memory) interrupted the run; completed trials were unaffected because the driver is resumable.
 
-**Limitations.** (1) LM Studio's default 4096-token context was left unchanged; long traces may be truncated or degrade, which could contribute to Qwen3.5's budget exhaustion and Qwen3-8B's. Raising it needs a user decision and a full rerun of every candidate. (2) Granite uses a different quantization/publisher. (3) Launch-time runtime errors can be missed because observation starts after launch, and raw runtime-error output is truncated at 20,024 characters. (4) 3 trials per case; 7 cases; no confidence claims. (5) Calibration cases are excluded from the formal dataset.
+**Limitations.** (1) LM Studio's default 4096-token context was left unchanged; long traces may be truncated or degrade, which could contribute to Qwen3.5's budget exhaustion and Qwen3-8B's. Addressed by the revision-3 re-check below for the two leaders only. (2) Granite uses a different quantization/publisher. (3) Launch-time runtime errors can be missed because observation starts after launch, and raw runtime-error output is truncated at 20,024 characters. (4) 3 trials per case; 7 cases; no confidence claims. (5) Calibration cases are excluded from the formal dataset.
+
+## Revision 3: 16k-context re-check (user-approved 2026-10-13)
+Revision-2 settings with the LM Studio context window raised from 4096 to 16384 tokens, for the two tied leaders only (42/42 trials completed, no infrastructure failures; `ledger_r3.jsonl`).
+
+| Metric (21 trials) | llama-3.1-8b, 4k | llama-3.1-8b, 16k | granite-4.1-8b, 4k | granite-4.1-8b, 16k |
+| --- | --- | --- | --- | --- |
+| Executable tool calls / natural termination / valid output | 21/21 each | 21/21 each | 21/21 each | 21/21 each |
+| Median messages / duration | 9 / 14 s | 11 / 9 s | 11 / 21 s | 11 / 20 s |
+| Self-reports REPRODUCED / NOT / INCONCLUSIVE | 3 / 16 / 2 | 0 / 20 / 1 | 12 / 4 / 5 | 11 / 3 / 7 |
+| Predicate evidenced | 2/21 | 3/21 | 3/21 | 3/21 |
+| Self-report agrees with evidence | 15/19 | 18/20 | 7/16 | 6/14 |
+
+The larger context did not change operational reliability or the ranking; differences in reproduction counts are within noise. Llama's agreement with evidence is higher and its latency lower at 16k, Granite's self-reports remain mostly unsupported claims. Llama still tends to report NOT_REPRODUCED (20/21 at 16k), so its low false-positive rate comes with low sensitivity; with 3/21 evidenced, no model-quality claim is made.
 
 ## Selection under the predeclared rule
 Rule (§9): first tool-call and structured-output reliability, then natural termination, then directional reproduction, cost and latency; materially tied candidates → lower cost/latency.
@@ -69,7 +82,7 @@ Rule (§9): first tool-call and structured-output reliability, then natural term
 - Structured-output and natural termination: `meta-llama-3.1-8b-instruct` and `granite-4.1-8b` are both 21/21; `qwen3-8b` 16/21, `qwen2.5-7b-instruct` 14/21, `qwen3.5-9b` 6/21.
 - Between the two leaders, directional reproduction is mixed: Granite evidenced 3/21 vs Llama 2/21, but Llama's self-reports agree with evidence more often (15/19 vs 7/16), and all differences are within noise. I treat them as materially tied; the tie-break is lower latency (Llama median 14 s vs 21 s; both local, no cost).
 
-**Recommendation (not an approval):** `meta-llama-3.1-8b-instruct` by the predeclared rule and tie-break, with `granite-4.1-8b` as the close alternative. `qwen/qwen3-8b` has the highest directional reproduction but fails the natural-termination criterion in 5 of 21 trials. The formal model needs the user's approval; larger context, other candidates or paid models are separate decisions.
+**Recommendation:** `meta-llama-3.1-8b-instruct` (user approved this as the formal model on 2026-10-13; frozen only at Stage 15) with a 16384-token context, by the predeclared rule and tie-break, confirmed by the revision-3 re-check, with `granite-4.1-8b` as the close alternative. `qwen/qwen3-8b` has the highest directional reproduction but fails the natural-termination criterion in 5 of 21 trials. The formal model needs the user's approval; larger context, other candidates or paid models are separate decisions.
 
 ## Other findings for Stage 15 (not acted on)
 - The generic `text:`/`type:` target contract and Driver-timeout handling are pre-study contracts, not frozen.

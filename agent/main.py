@@ -16,8 +16,11 @@ from pydantic_ai.messages import ModelMessagesTypeAdapter
 
 from capabilities import CapabilityMode
 from models import (
+    LocalModelConfig,
     create_local_client,
+    create_anthropic_model,
     create_local_model,
+    uses_anthropic_reference,
     get_local_model_config,
     verify_configured_model,
 )
@@ -80,8 +83,13 @@ async def run_flutter_runtime_attempt(case: str, workspace: Path | None = None, 
     """Run PydanticAI normally; it owns the tool loop and natural termination."""
     issue_path, issue_text = load_issue(case)
     config = get_local_model_config()
-    client = create_local_client(config)
-    await verify_configured_model(config, client)
+    reference = uses_anthropic_reference()
+    if reference:
+        config = LocalModelConfig(config.base_url, os.environ["ANTHROPIC_MODEL"], "")
+        client = None
+    else:
+        client = create_local_client(config)
+        await verify_configured_model(config, client)
 
     mcp_toolset = create_flutter_mcp_toolset(workspace)
     async with mcp_toolset:
@@ -102,12 +110,14 @@ async def run_flutter_runtime_attempt(case: str, workspace: Path | None = None, 
         adapter = FlutterRuntimeAdapter(mcp_toolset, dtd_uri)
         await adapter.begin_runtime_error_window()
         agent = Agent(
-            create_local_model(config, client),
+            create_anthropic_model(config.model_name) if reference else create_local_model(config, client),
             output_type=ReproductionResult,
             instructions=REPRODUCTION_INSTRUCTIONS,
             model_settings=(
-                {"temperature": STUDY_TEMPERATURE, "extra_body": STUDY_EXTRA_BODY}
-                if (workspace and os.environ.get("STUDY_REVISION") == "2")
+                {"temperature": STUDY_TEMPERATURE}
+                if reference
+                else {"temperature": STUDY_TEMPERATURE, "extra_body": STUDY_EXTRA_BODY}
+                if (workspace and os.environ.get("STUDY_REVISION") in ("2", "3", "4"))
                 else {"temperature": STUDY_TEMPERATURE if workspace else 0.0}
             ),
             end_strategy="graceful",

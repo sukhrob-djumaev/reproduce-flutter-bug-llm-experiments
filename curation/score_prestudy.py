@@ -61,7 +61,7 @@ def score(case: str, run_id: str) -> bool:
 
 def main() -> None:
     ledger = []
-    for name, revision in (("ledger.jsonl", "1"), ("ledger_r2.jsonl", "2")):
+    for name, revision in (("ledger.jsonl", "1"), ("ledger_r2.jsonl", "2"), ("ledger_r3.jsonl", "3"), ("ledger_r4.jsonl", "4")):
         path = ROOT / "results" / "prestudy" / name
         if path.exists():
             ledger += [{"revision": revision, **json.loads(l)} for l in path.read_text().splitlines() if l.strip()]

@@ -31,11 +31,15 @@ DEVICE = "emulator-5556"
 EMULATOR = Path.home() / "Library" / "Android" / "sdk" / "emulator" / "emulator"
 AVD = "Medium_Phone_API_36-ext19"
 ATTEMPT_TIMEOUT_SECONDS = 1500
+REVISION_3_CONTEXT_LENGTH = 16384  # revision 3 = revision 2 settings with a 16k context window
 
 
 def _load_model(model: str) -> None:
     subprocess.run([str(LMS), "unload", "--all"], capture_output=True, text=True)
-    subprocess.run([str(LMS), "load", model, "-y"], check=True, capture_output=True, text=True)
+    command = [str(LMS), "load", model, "-y"]
+    if os.environ.get("STUDY_REVISION") == "3":
+        command += ["--context-length", str(REVISION_3_CONTEXT_LENGTH)]
+    subprocess.run(command, check=True, capture_output=True, text=True)
 
 
 def _server_up() -> bool:
@@ -80,19 +84,19 @@ def _restart_emulator() -> None:
 
 
 def _log_path(model: str, case: str, trial: int) -> Path:
-    return OUTPUT_DIRECTORY / f"{model.replace('/', '_')}__{case}__t{trial}{'' if os.environ.get('STUDY_REVISION', '1') == '1' else '__r2'}.log"
+    return OUTPUT_DIRECTORY / f"{model.replace('/', '_')}__{case}__t{trial}{'' if os.environ.get('STUDY_REVISION', '1') == '1' else '__r' + os.environ['STUDY_REVISION']}.log"
 
 
 def main() -> None:
-    """Usage: prestudy.py [--revision 2 MODEL...]; revision 1 is the original thinking-default run."""
+    """Usage: prestudy.py [--revision 2|3|4 MODEL...]; revision 1 is the original thinking-default run."""
     arguments = sys.argv[1:]
     revision = "1"
     models = CANDIDATE_MODELS
-    if arguments[:2] == ["--revision", "2"]:
-        revision, models = "2", tuple(arguments[2:])
+    if arguments[:2] in (["--revision", "2"], ["--revision", "3"], ["--revision", "4"]):
+        revision, models = arguments[1], tuple(arguments[2:])
     os.environ["STUDY_REVISION"] = revision
     OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
-    ledger_path = OUTPUT_DIRECTORY / ("ledger.jsonl" if revision == "1" else "ledger_r2.jsonl")
+    ledger_path = OUTPUT_DIRECTORY / {"1": "ledger.jsonl", "2": "ledger_r2.jsonl", "3": "ledger_r3.jsonl", "4": "ledger_r4.jsonl"}[revision]
     done = set()
     if ledger_path.exists():
         for line in ledger_path.read_text().splitlines():
@@ -105,11 +109,12 @@ def main() -> None:
             for trial in range(1, TRIALS_PER_CASE + 1):
                 if (model, case, trial) in done:
                     continue
-                if not loaded:
+                if not loaded and revision != "4":
                     _load_model(model)
                     loaded = True
                 for attempt in range(1, MAX_INFRASTRUCTURE_ATTEMPTS + 1):
-                    _ensure_model(model)
+                    if revision != "4":
+                        _ensure_model(model)
                     if not _emulator_healthy():
                         _restart_emulator()
                     started = monotonic()
@@ -117,7 +122,8 @@ def main() -> None:
                         completed = subprocess.run(
                             [sys.executable, "main.py", "--case", case],
                             cwd=Path(__file__).resolve().parent,
-                            env={**os.environ, "LM_STUDIO_MODEL": model, "PYDANTIC_AI_NO_BANNER": "1", "STUDY_REVISION": revision},
+                            env={**os.environ, "LM_STUDIO_MODEL": model, "PYDANTIC_AI_NO_BANNER": "1", "STUDY_REVISION": revision,
+                                 **({"STUDY_PROVIDER": "anthropic", "ANTHROPIC_MODEL": model} if revision == "4" else {})},
                             capture_output=True,
                             text=True,
                             timeout=ATTEMPT_TIMEOUT_SECONDS,
