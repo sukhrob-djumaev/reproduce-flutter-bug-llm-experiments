@@ -7,4 +7,6 @@ Session: 2026-10-12/13 — Stage 14 revision 2 completed and reported.
 - Updated `docs/stage_14_prestudy_report.md` (rev-2 section, limitations, selection under rule, recommendation), plan/README/.agent status.
 - Checks run: 5 offline unit tests pass; scorer and summary scripts run. Not run: Flutter analysis.
 
-**Continuation point / user action:** user decides formal model, context-length rerun, any paid model, and bug-evidence option. Do not start Stage 15 without `Start Stage 15 according to plan.md`.
+- Later 2026-10-13: user approved Llama-3.1-8B as formal model, ran revision 3 (16k context, llama + granite, 42/42; ranking unchanged), added Anthropic reference adapter (`STUDY_PROVIDER=anthropic`, revision 4; no API call made).
+
+**Continuation point / user action:** user sets ANTHROPIC_API_KEY and confirms the budget for revision 4; bug-evidence option A/B/C pending. Do not start Stage 15 without `Start Stage 15 according to plan.md`.

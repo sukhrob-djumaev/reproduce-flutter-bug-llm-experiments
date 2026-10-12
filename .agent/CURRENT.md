@@ -7,13 +7,14 @@ Updated: 2026-10-13. Operational state only; the formal protocol and `plan.md` g
 - **Branch:** `main`; read live HEAD/status on resume.
 - **Evidence:** `docs/stage_14_prestudy_config.md`, `docs/stage_14_prestudy_report.md`, `docs/stage_14_candidate_rationale.md`, `results/prestudy/{ledger.jsonl,ledger_r2.jsonl,ledger_superseded_attempts.jsonl,scores.csv}`, local runs `results/runs/` (Git-ignored), scorers `curation/score_prestudy.py` and `curation/summarize_prestudy.py`.
 - **Result summary:** all candidates emit executable calls under thinking-off. Natural termination: llama-3.1-8b 21/21, granite-4.1-8b 21/21, qwen3-8b 16/21, qwen2.5-7b 14/21, qwen3.5-9b 6/21. Independent evidence of reproduction is low everywhere (1-6 of 21; four cases never evidenced). Rule recommendation (not an approval): meta-llama-3.1-8b-instruct by latency tie-break over granite-4.1-8b. Rev-1 qwen2.5 evidenced count corrected from 4/21 to 1/21.
-- **Approved scope now:** none beyond reviewing/answering about Stage 14. No Stage 15, new curation, further trials, or formal runs without explicit user approval.
+- **User decisions 2026-10-13:** formal model approved = `meta-llama-3.1-8b-instruct` (not frozen until Stage 15); 16k-context re-check done (rev 3, ledger_r3.jsonl; ranking unchanged, recommend 16384 context); paid reference run approved (claude-haiku-5-5, rev 4, 21 trials, labelled reference outside primary outcome) but NOT executed: needs ANTHROPIC_API_KEY in env and cost confirmation (est. <= $3).
+- **Approved scope now:** the revision-4 reference run once key/cost confirmed; otherwise only reviewing Stage 14. No Stage 15, new curation, further trials, or formal runs without explicit user approval.
 
 ## Docs-only research
 `docs/bug_evidence_review.md` (user-approved 2026-10-12). Options A/B/C in that file await the user's choice.
 
 ## Pending user decisions
-1. Approve the formal model (recommendation above) or change candidates; whether to rerun with a larger LM Studio context (4096 default is a recorded limitation); paid/cloud models need explicit approval and an adapter.
+1. Set ANTHROPIC_API_KEY in shell and confirm $3 budget to run revision 4.
 2. Bug-evidence option A/B/C.
 3. Then `Start Stage 15 according to plan.md`.
 

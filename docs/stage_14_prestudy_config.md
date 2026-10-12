@@ -20,5 +20,5 @@ Revision 2 addendum (2026-10-12): `granite-4.1-8b` added as a fifth candidate by
 ## Revision 3 (context-length re-check; user-approved 2026-10-13)
 Identical to revision 2 except the LM Studio context window is 16384 tokens (`lms load --context-length 16384`) instead of the 4096 default. Candidates: `meta-llama-3.1-8b-instruct` and `granite-4.1-8b` (the two operationally tied leaders), 21 trials each, logged in `ledger_r3.jsonl`. Purpose: check whether the 4096 default confounded the revision-2 result before the formal model is frozen. Not a new candidate-set change.
 
-## Revision 4 (paid reference run; user-approved 2026-10-13, not yet executed)
+## Revision 4 (paid reference run; user-approved 2026-10-13; awaiting API key and cost confirmation)
 A labelled reference condition, outside the primary outcome and the §9 selection: one Anthropic model (`claude-haiku-5-5`) through PydanticAI's Anthropic provider, same prompt, tools, temperature 0.2, 40-request budget, cases and emulator, 21 trials, logged in `ledger_r4.jsonl`. Enabled by `STUDY_PROVIDER=anthropic`; the key is read only from `ANTHROPIC_API_KEY` in the environment. It does not change the formal model or the protocol. Cost is estimated and confirmed with the user before any call is made.
