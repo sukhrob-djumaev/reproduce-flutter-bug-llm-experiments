@@ -25,7 +25,7 @@ RQ3 is deferred. The current work prepares a defensible RQ1/RQ2 study.
 
 ## Current Status
 
-The engineering pilot, formal-design preparation, and bounded public-case curation batches through Stage 13B are complete. Stage 14 (model-selection pre-study) has been executed (63/63 attempts; see `docs/stage_14_prestudy_report.md`) and awaits user review and formal-model approval. Stage 15 has not started and requires explicit approval.
+The engineering pilot, formal-design preparation, and bounded public-case curation batches through Stage 13B are complete. Stage 14 (model-selection pre-study) has been executed (revision 1: 63/63 attempts; revision 2, thinking off: 84/84 trials; see `docs/stage_14_prestudy_report.md`) and awaits user review and formal-model approval. Stage 15 has not started and requires explicit approval.
 
 | Area | Status |
 | --- | --- |

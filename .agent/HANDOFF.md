@@ -1,13 +1,10 @@
 # Latest session handoff
 
-Session: 2026-10-11/12 — Stage 14 opened and executed.
+Session: 2026-10-12/13 — Stage 14 revision 2 completed and reported.
 
-- Moved the protocol into `docs/` and removed the stray `.docx` (`bc7a5b0`, `fd4a921`). Approved Stage 14 start, candidates (3 local models) and 7 calibration cases.
-- Wrote and user-approved symptom-only issue snapshots `issues/case_<id>.md`; hashes recorded in the ground-truth records.
-- Added public-case execution support: `agent/public_cases.py`, generic `text:`/`type:` targets and Driver-timeout handling in `agent/tools.py`, public-case/budget/outcome handling in `agent/main.py`, `agent/prestudy.py`; fixed config in `docs/stage_14_prestudy_config.md`.
-- Ran 63 trials; fixed harness issues (emulator storage, LM Studio stopping, S13-005 source subset, mislabeled model outcomes). 108 infrastructure-failure attempts are retained in `results/prestudy/ledger_superseded_attempts.jsonl`.
-- Results and limits: `docs/stage_14_prestudy_report.md`.
+- Ran revision 2 (thinking off, `STUDY_REVISION=2`) for qwen3-8b, llama-3.1-8b, qwen3.5-9b, granite-4.1-8b: 84/84 trials completed; 11 qwen3.5 infrastructure failures retained (10 from a Driver get_text exception bug fixed in `d71c5b2`, 1 connection). LM Studio was force-quit once for memory; the driver resumed from the ledger.
+- Added `curation/summarize_prestudy.py`; scorer counts agent-originated events only, which corrected rev-1 qwen2.5 evidenced from 4/21 to 1/21.
+- Updated `docs/stage_14_prestudy_report.md` (rev-2 section, limitations, selection under rule, recommendation), plan/README/.agent status.
+- Checks run: 5 offline unit tests pass; scorer and summary scripts run. Not run: Flutter analysis.
 
-Checks run: 5 offline unit tests (before the study); two sanity runs; full 63-attempt study; independent scoring script run. Offline unit tests re-run after the final edits: 5 passed. Not run: Flutter analysis.
-
-**Continuation point / user action:** review the report and decide the formal model / candidate changes (see CURRENT.md). Do not start Stage 15 without `Start Stage 15 according to plan.md`.
+**Continuation point / user action:** user decides formal model, context-length rerun, any paid model, and bug-evidence option. Do not start Stage 15 without `Start Stage 15 according to plan.md`.
